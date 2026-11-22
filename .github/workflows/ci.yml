@@ -1,0 +1,44 @@
+# CI for antinet-pwa.
+#
+# Mirrors the workbench's standard gates: types, lint, tests, coverage thresholds, build.
+# Steps are separate so a failure names which gate broke rather than reporting a generic
+# "build failed". This is the same sequence `npm run verify` runs locally.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Coverage thresholds
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+        env:
+          # The build must not require a live database — lib/env.ts validates lazily for exactly
+          # this reason. A syntactically valid URL is enough to satisfy the schema at build time.
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci

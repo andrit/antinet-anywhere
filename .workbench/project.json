@@ -1,0 +1,644 @@
+{
+  "version": "1.0",
+  "mcp_tools": [
+    "rag_ingest",
+    "rag_query",
+    "rag_status",
+    "rag_reindex",
+    "project_test"
+  ],
+  "universal_advance_gate": {
+    "description": "Applies to every code phase across all project types before the phase is marked complete.",
+    "skill": "/phase-audit",
+    "exempt_phase_ids": [
+      "0",
+      "D",
+      "7",
+      "8",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+    ],
+    "exempt_reason": "Phase 0 and D produce documents only. Phase 7 captures learnings. Phases 8, 11-16 are human-owned QA, infra, legal, and launch steps with no new code deliverables.",
+    "criterion": "Run /phase-audit. Address critical findings (dead code, broken conventions) before advancing. Defer acceptable shortcuts with a ponytail: comment. Attach the score line to the phase sign-off."
+  },
+  "search_config": {
+    "vector_weight": 0.7,
+    "text_weight": 0.3,
+    "match_threshold": 0.5,
+    "chunk_size": 500,
+    "chunk_overlap": 50
+  },
+  "foundation_skills": [
+    "event-storming",
+    "define-bounded-contexts",
+    "design-aggregates",
+    "model-domain-events",
+    "ubiquitous-language",
+    "ux-research-methods",
+    "design-system-setup"
+  ],
+  "skills_index": "_base/skills/INDEX.md",
+  "provides": [],
+  "consumes": [],
+  "capabilities": [
+    "rag",
+    "memory"
+  ],
+  "design_skills": [
+    "visual-design-principles",
+    "color-theory-and-systems",
+    "typography-system",
+    "layout-and-composition",
+    "ux-principles-and-patterns",
+    "ux-research-methods",
+    "design-system-setup",
+    "responsive-layout-patterns",
+    "accessibility-implementation",
+    "animation-and-motion"
+  ],
+  "type": "fullstack",
+  "description": "Full-stack web application — server-rendered or SPA frontend with a backend API, database, authentication, and deployment pipeline.",
+  "frameworks": {
+    "default": "next",
+    "available": [
+      "next"
+    ]
+  },
+  "sdlc": {
+    "reference": "docs/25-sdlc-framework.md",
+    "stages": [
+      "build",
+      "launch",
+      "ongoing"
+    ],
+    "phases": [
+      {
+        "id": "0",
+        "name": "Planning & DDD",
+        "stage": "build",
+        "owner": "shared",
+        "collaborative": true,
+        "purpose": "Phase 0 is a collaborative working session — not a deliverable Claude produces alone. Claude facilitates each activity by asking questions and capturing the human's answers. Every artifact must be reviewed and explicitly confirmed by the human before Phase 0 can advance. None of these documents is 'done' until the human says so.",
+        "deliverables": [
+          {
+            "text": "design/kano.md — Features classified as Must-be, One-dimensional, Attractive, Indifferent, or Reverse. Claude proposes candidates from the product story; human classifies each one. Scope decisions (v1 vs deferred) made for every Attractive feature. Scope: slice-scoped — if the product is multi-module, cover only the modules of the declared first slice (.workbench/slice.json); inventing for modules with no customer is fabrication, not planning.",
+            "scope": "slice-scoped",
+            "evidence": {
+              "kind": "path",
+              "value": "design/kano.md"
+            }
+          },
+          {
+            "text": "design/task-flow.md — Step-by-step sequences for each core user task (from Must-be + One-dimensional features). Human describes what the user does; Claude captures and asks about branches and failure states. Scope: slice-scoped — if the product is multi-module, cover only the modules of the declared first slice (.workbench/slice.json); inventing for modules with no customer is fabrication, not planning.",
+            "scope": "slice-scoped",
+            "evidence": {
+              "kind": "path",
+              "value": "design/task-flow.md"
+            }
+          },
+          {
+            "text": "design/user-flow.md — Screen-by-screen navigation map with auth gates, empty states, and error states. Mermaid diagram. Screen names must come from the human — they become ubiquitous language. Scope: slice-scoped — if the product is multi-module, cover only the modules of the declared first slice (.workbench/slice.json); inventing for modules with no customer is fabrication, not planning.",
+            "scope": "slice-scoped",
+            "evidence": {
+              "kind": "path",
+              "value": "design/user-flow.md"
+            }
+          },
+          {
+            "text": "design/event-storm.md — All domain events in temporal order (what changes state in the system). Human drives domain knowledge; Claude facilitates and captures.",
+            "scope": "domain-wide",
+            "evidence": {
+              "kind": "path",
+              "value": "design/event-storm.md"
+            }
+          },
+          {
+            "text": "design/bounded-contexts.md — Named bounded contexts with ownership boundaries, aggregate roots, and their invariants.",
+            "scope": "domain-wide",
+            "evidence": {
+              "kind": "path",
+              "value": "design/bounded-contexts.md"
+            }
+          },
+          {
+            "text": "design/glossary.md — Ubiquitous language: every domain term defined and used consistently from this point forward across code, docs, and conversation.",
+            "scope": "domain-wide",
+            "evidence": {
+              "kind": "path",
+              "value": "design/glossary.md"
+            }
+          },
+          {
+            "text": "docs/product-development/product-story.md — initial product story: target user, problem being solved, and core value proposition. Seeded to project RAG.",
+            "scope": "domain-wide",
+            "evidence": {
+              "kind": "path",
+              "value": "docs/product-development/product-story.md"
+            }
+          }
+        ],
+        "skills_to_read": [
+          "kano-model",
+          "task-flow",
+          "user-flow",
+          "event-storming",
+          "define-bounded-contexts",
+          "design-aggregates",
+          "model-domain-events",
+          "ubiquitous-language"
+        ],
+        "advance_criteria": [
+          "Human has reviewed design/kano.md and confirmed all feature classifications and scope decisions — no unresolved items",
+          "Human has reviewed design/task-flow.md and confirmed all task steps, branches, and failure states match their intent",
+          "Human has reviewed design/user-flow.md and confirmed all screens are named and all navigation paths are correct",
+          "Human has reviewed design/event-storm.md and confirmed all domain events are captured in sequence",
+          "Bounded contexts named, owned, and boundaries explicitly agreed",
+          "design/glossary.md complete — every term used in the above documents is defined",
+          "Human explicitly says 'approve phase 0' or equivalent confirmation"
+        ]
+      },
+      {
+        "id": "1",
+        "name": "Scaffold",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Establish the project structure, tooling, and CI baseline before any feature work. A clean scaffold means features can be added without structural debt.",
+        "deliverables": [
+          "Framework chosen and initialized (Next.js, Remix, SvelteKit, or equivalent)",
+          "TypeScript configured (strict mode)",
+          "Linting and formatting set up (ESLint, Prettier)",
+          "Environment variable structure documented in .env.example",
+          "Database connection verified (local dev database running)",
+          "CI pipeline defined (GitHub Actions or equivalent)",
+          "CLAUDE.md created with project context and domain model summary"
+        ],
+        "skills_to_read": [
+          "environment-config-management"
+        ],
+        "advance_criteria": [
+          "Framework dev server starts with no errors",
+          "`npm run build` or equivalent exits 0",
+          "Database connection verified from application code",
+          "TypeScript compiles clean (zero errors)",
+          "/phase-audit run — findings addressed or deferred with ponytail: comments"
+        ]
+      },
+      {
+        "id": "2",
+        "name": "Core Schema",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Define all data models and run migrations before building features. Schema changes after features are built break existing code and data.",
+        "deliverables": [
+          {
+            "text": "All core tables/collections created via migrations",
+            "scope": "slice-scoped"
+          },
+          {
+            "text": "Relationships and constraints defined (foreign keys, unique indexes, not-null constraints)",
+            "scope": "slice-scoped"
+          },
+          {
+            "text": "ORM models or query layer set up (Drizzle, Prisma, or raw SQL with type wrappers)",
+            "scope": "slice-scoped"
+          },
+          {
+            "text": "Seed script for local development data",
+            "scope": "slice-scoped"
+          },
+          {
+            "text": "Migration strategy documented (how to run, how to rollback)",
+            "scope": "domain-wide"
+          }
+        ],
+        "skills_to_read": [
+          "add-database-table"
+        ],
+        "advance_criteria": [
+          "All migrations run cleanly from scratch on a fresh database",
+          "Seed script creates enough data to develop against",
+          "ORM types match the domain model from Phase 0",
+          "/phase-audit run — findings addressed or deferred with ponytail: comments"
+        ]
+      },
+      {
+        "id": "D",
+        "name": "Design",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Design the full user experience before building it. Every screen, every interaction, every state. Building without a spec produces inconsistent UX and requires constant rework.",
+        "deliverables": [
+          {
+            "text": "User flow: entry points → core actions → success states → error states for each role",
+            "scope": "slice-scoped"
+          },
+          {
+            "text": "Page/screen inventory with purpose and key interactions",
+            "scope": "slice-scoped"
+          },
+          {
+            "text": "Component hierarchy (which components compose into which pages)",
+            "scope": "slice-scoped"
+          },
+          "Design tokens: brand colors, typography scale, spacing system, border radii",
+          "Navigation structure (sidebar, header, mobile nav)",
+          {
+            "text": "Empty states, loading states, and error states for each data-driven view",
+            "scope": "slice-scoped"
+          },
+          {
+            "text": "Form design: field layout, validation messaging, submission feedback",
+            "scope": "slice-scoped"
+          },
+          "Mobile layout decisions (responsive breakpoints, mobile-specific patterns)",
+          {
+            "text": "docs/product-development/ — product positioning documents that inform the design: product-story.md (target user, problem, core value proposition), product-synthesis.md (north star positioning document synthesizing story and strategy into a single agreed frame for product, design, and marketing). Seeded to project RAG.",
+            "scope": "domain-wide",
+            "evidence": {
+              "kind": "path",
+              "value": "docs/product-development/"
+            }
+          },
+          {
+            "text": "design/wireframes/wireframes.html — self-contained wireframe file covering every planned screen, built from the project's design tokens; navigable in a browser and used to discuss layout, unique affordances, and interaction patterns before any implementation begins",
+            "scope": "slice-scoped",
+            "evidence": {
+              "kind": "path",
+              "value": "design/wireframes/wireframes.html"
+            }
+          }
+        ],
+        "skills_to_read": [
+          "design-system-setup",
+          "ux-principles-and-patterns",
+          "responsive-layout-patterns",
+          "typography-system",
+          "color-theory-and-systems"
+        ],
+        "advance_criteria": [
+          "Every page that will be built is named and its purpose described",
+          "Empty, loading, and error states are designed for every list/data view",
+          "Mobile layout is explicitly planned (not assumed to 'just work')",
+          "Design tokens committed to project config (Tailwind theme extension or CSS variables)",
+          "docs/product-development/product-synthesis.md agreed by human as the north star positioning document — competitive position, target buyer, value chain, and AI/voice/integration stance confirmed before wireframes are finalized",
+          "design/wireframes/wireframes.html created and covers every planned screen — layout, affordances, and interaction patterns reviewed and agreed before feature implementation starts"
+        ]
+      },
+      {
+        "id": "3",
+        "name": "Core Features",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Build the primary feature set from the design spec. One feature at a time, fully complete (API + UI + validation + error states) before starting the next.",
+        "deliverables": [
+          "All core CRUD operations implemented (create, read, update, delete for primary entities)",
+          "API endpoints with Zod/schema validation on all inputs",
+          "UI pages matching the design spec",
+          "Form validation with user-facing error messages",
+          "Loading and empty states implemented (not left as TODOs)",
+          "Data fetching pattern established and consistent across pages"
+        ],
+        "skills_to_read": [
+          "add-api-endpoint",
+          "state-solutions",
+          "component-types",
+          "error-handling-middleware"
+        ],
+        "advance_criteria": [
+          "All core features work end-to-end on happy path",
+          "Form validation catches and shows errors (not just server-side)",
+          "No unhandled loading states (spinners or skeletons in place)",
+          "API inputs validated — bad data returns 400, not 500",
+          "/phase-audit run — findings addressed or deferred with ponytail: comments"
+        ]
+      },
+      {
+        "id": "4",
+        "name": "Auth & Authorization",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Add authentication and role-based access control. Auth touches every layer of the stack — doing it after features creates security gaps and requires retroactive middleware work.",
+        "deliverables": [
+          "Auth provider integrated (Clerk, NextAuth/Auth.js, Lucia, or custom)",
+          "Sign in / sign up / sign out flows working",
+          "Protected routes — unauthorized access redirects to login",
+          "Session management (JWT, cookie, or server session — documented decision)",
+          "Role-based access: permissions enforced server-side, not just in UI",
+          "User profile and account management page",
+          "Password reset flow (if using credential auth)"
+        ],
+        "skills_to_read": [
+          "add-authentication",
+          "security-hardening"
+        ],
+        "advance_criteria": [
+          "Unauthenticated requests to protected routes get 401/redirect (not 500 or 200)",
+          "Role permissions enforced at API layer (not just hidden in UI)",
+          "Auth state persists across page refresh",
+          "Sign up → onboarding → core feature flow works end-to-end",
+          "/phase-audit run — findings addressed or deferred with ponytail: comments"
+        ]
+      },
+      {
+        "id": "5",
+        "name": "Testing",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Write tests that catch real regressions — not tests that just execute code. Test the critical paths and domain invariants, not every getter and setter.",
+        "deliverables": [
+          "Unit tests for all pure functions and domain logic",
+          "Integration tests for critical API routes (happy path + validation errors + auth checks)",
+          "Component tests for complex interactive components",
+          "E2E test for the primary user flow (signup → core action → success state)",
+          "Test database configured (isolated from dev data)",
+          "CI runs the test suite on every push"
+        ],
+        "skills_to_read": [
+          "write-integration-tests",
+          "component-testing"
+        ],
+        "advance_criteria": [
+          "`npm test` passes with zero failures",
+          "CI runs tests on push and blocks merge on failure",
+          "Critical API routes have auth tests (verifies 401 for unauthenticated, 403 for wrong role)",
+          "Primary user flow covered by at least one E2E test",
+          "/phase-audit run — findings addressed or deferred with ponytail: comments"
+        ]
+      },
+      {
+        "id": "6",
+        "name": "Polish",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Harden the app for real users — performance, accessibility, mobile, and production configuration.",
+        "deliverables": [
+          "Mobile audit: all pages tested at 375px and 768px breakpoints",
+          "Accessibility audit: keyboard navigation, screen reader labels, color contrast",
+          "Lighthouse Performance ≥ 85 on primary pages",
+          "Production environment config: env vars set, secrets managed, debug logging off",
+          "Error boundaries in place (app doesn't white-screen on unexpected errors)",
+          "Rate limiting on auth endpoints and any public-facing mutation routes",
+          "CORS configuration locked down for production",
+          "Content Security Policy headers set"
+        ],
+        "skills_to_read": [
+          "production-config-and-secrets",
+          "setup-health-and-observability",
+          "accessibility-implementation",
+          "security-hardening"
+        ],
+        "advance_criteria": [
+          "All pages usable at 375px (no horizontal scroll, no overlapping elements)",
+          "No Lighthouse Accessibility violations (red flags)",
+          "Production env vars documented and set in deployment environment",
+          "Auth endpoints have rate limiting in place",
+          "/phase-audit run — findings addressed or deferred with ponytail: comments"
+        ]
+      },
+      {
+        "id": "7",
+        "name": "Extract",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Capture what was learned — patterns, architectural decisions, and reusable components — back into the workbench RAG and skill files.",
+        "deliverables": [
+          "Session postmortem written and ingested to project RAG",
+          "Novel patterns captured as skill files (anything that took meaningful effort to figure out)",
+          "Architectural decisions documented (why this auth provider, why this data fetching approach, etc.)",
+          "Component library documented if substantial"
+        ],
+        "skills_to_read": [],
+        "advance_criteria": [
+          "Postmortem ingested to RAG",
+          "Any decision that took real time to reach is documented"
+        ]
+      },
+      {
+        "id": "8",
+        "name": "QA Gate",
+        "stage": "build",
+        "owner": "shared",
+        "purpose": "Human-verified test of the full application before launch prep begins.",
+        "deliverables": [
+          "All primary user flows tested by a human (not just automated tests)",
+          "Mobile verified on a real device (not just browser DevTools responsive mode)",
+          "Auth flows verified: sign up, sign in, sign out, protected route access denied",
+          "Error states verified: form validation, API error messages, network failure handling",
+          "Test suite passing in CI"
+        ],
+        "skills_to_read": [],
+        "advance_criteria": [
+          "Human has clicked through all primary flows (not delegated to automated tests)",
+          "Mobile verified on a physical device",
+          "Zero known bugs that block primary flows"
+        ]
+      },
+      {
+        "id": "9",
+        "name": "Support Audit",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Inventory every error state and user-facing failure before launch so support issues are handled by design.",
+        "deliverables": [
+          "Error state inventory: what can go wrong, at what point in the flow",
+          "Support scenario table: scenario → likely cause → customer-facing message → resolution",
+          "High-risk edge cases identified and handled or documented"
+        ],
+        "skills_to_read": [],
+        "advance_criteria": [
+          "Every form has user-facing validation messages (not raw error codes)",
+          "API errors return structured, human-readable messages (not stack traces)",
+          "Support scenario table committed to project docs",
+          "/phase-audit run — findings addressed or deferred with ponytail: comments"
+        ]
+      },
+      {
+        "id": "10",
+        "name": "Support Automation",
+        "stage": "build",
+        "owner": "claude",
+        "purpose": "Reduce inbound support volume with self-serve tooling and hardened error messaging.",
+        "deliverables": [
+          "FAQ or help documentation page",
+          "All error messages reviewed for clarity (specific, actionable, not 'Something went wrong')",
+          "Account self-service: password reset, email change, account deletion",
+          "support-playbook.md: internal runbook for common support tickets"
+        ],
+        "skills_to_read": [],
+        "advance_criteria": [
+          "Help/FAQ page exists and is linked from the app",
+          "All error messages specific and actionable",
+          "Account self-service flows work end-to-end",
+          "/phase-audit run — findings addressed or deferred with ponytail: comments"
+        ]
+      },
+      {
+        "id": "11",
+        "name": "Infrastructure",
+        "stage": "launch",
+        "owner": "human",
+        "purpose": "Provision the production environment.",
+        "deliverables": [
+          "Hosting provisioned (Vercel, Railway, Fly.io, or cloud provider)",
+          "Production database provisioned and connection string set",
+          "Domain configured and pointing to deployment",
+          "All env vars set in production environment",
+          "CDN configured for static assets"
+        ],
+        "advance_criteria": [
+          "Production URL returns 200",
+          "Database connection from production verified",
+          "TypeScript build succeeds on production deployment"
+        ]
+      },
+      {
+        "id": "12",
+        "name": "Staging & Smoke Test",
+        "stage": "launch",
+        "owner": "human",
+        "purpose": "Verify the full application against the production environment before opening to users.",
+        "deliverables": [
+          "Full sign up → core action → success flow on production URL",
+          "Auth flows verified (sign in, sign out, protected route)",
+          "Database writes and reads verified against production database",
+          "Email delivery verified (if applicable)"
+        ],
+        "advance_criteria": [
+          "Primary flow works on production URL",
+          "No 500 errors in production logs during smoke test"
+        ]
+      },
+      {
+        "id": "13",
+        "name": "Legal & Compliance",
+        "stage": "launch",
+        "owner": "human",
+        "purpose": "Legal minimum for a live web application.",
+        "deliverables": [
+          "/privacy — Privacy Policy",
+          "/terms — Terms of Service",
+          "Cookie consent (if using analytics or third-party tracking)",
+          "GDPR/CCPA compliance basics if collecting personal data"
+        ],
+        "advance_criteria": [
+          "Privacy and Terms pages live and linked in footer",
+          "Cookie consent functional before any tracking scripts load"
+        ]
+      },
+      {
+        "id": "B",
+        "name": "Brand & Identity Finalization",
+        "stage": "launch",
+        "owner": "shared",
+        "collaborative": true,
+        "purpose": "Finalize the product's brand identity before launch. The product is now fully built — you know what it actually is, what surprised you, and what users responded to. The name, story, and visual language decided in Phase 0 were hypotheses. This phase confirms or refines them with complete knowledge. No launch proceeds until the brand package is explicitly approved.",
+        "deliverables": [
+          "Product name confirmed — domain available, App Store/Play Store slot open, trademark checked, social handles reserved",
+          "docs/product-development/product-story.md — final version rewritten with post-build knowledge; Phase 0 draft preserved as reference section",
+          "docs/product-development/brand-identity.md — one-liner, tagline, brand values (3–5 words), voice and tone guide",
+          "Color palette finalized — primary, secondary, accent, background, error, text roles; hex codes documented; WCAG AA contrast verified",
+          "Typography confirmed — primary and body fonts, weights, size scale, fallback stack; font license documented",
+          "Logo delivered — SVG source files: mark, wordmark, full logo in light and dark variants; PNG exports at all required sizes",
+          "App icon / favicon generated from final logomark at all required platform sizes",
+          "Domain registered and SSL configured",
+          "Launch copy drafted — App Store / Play Store description (short and long), keywords, tagline for Product Hunt or launch post, landing page hero copy"
+        ],
+        "skills_to_read": [
+          "brand-finalization"
+        ],
+        "advance_criteria": [
+          "Product name is final — agreed by all stakeholders, not a working title",
+          "docs/product-development/product-story.md updated with full post-build knowledge",
+          "docs/product-development/brand-identity.md complete — one-liner, tagline, brand values, voice guide, colors, typography all documented",
+          "Logo delivered as SVG source files (not PNG only) in light and dark variants",
+          "WCAG AA contrast verified for primary text on background color",
+          "Domain registered and SSL certificate provisioned",
+          "Human explicitly approves the brand package before launch proceeds"
+        ]
+      },
+      {
+        "id": "14",
+        "name": "Monitoring Setup",
+        "stage": "launch",
+        "owner": "human",
+        "purpose": "Know immediately when something breaks in production.",
+        "deliverables": [
+          "Error tracking configured (Sentry or equivalent)",
+          "Uptime monitoring configured",
+          "Application logs accessible (not just console.log in serverless limbo)",
+          "Performance baseline captured (Core Web Vitals on primary pages)"
+        ],
+        "advance_criteria": [
+          "Test error shows up in Sentry",
+          "Uptime monitor pinging production URL"
+        ]
+      },
+      {
+        "id": "15",
+        "name": "Go Live",
+        "stage": "launch",
+        "owner": "human",
+        "purpose": "Open to real users and verify the first real session.",
+        "deliverables": [
+          "App announced (social, email list, Product Hunt if applicable)",
+          "First real user completes the primary flow",
+          "No Sentry errors from first hour of real traffic",
+          "First real session reviewed in analytics"
+        ],
+        "advance_criteria": [
+          "At least one real user has completed the primary flow",
+          "No unhandled errors in first hour of traffic"
+        ]
+      },
+      {
+        "id": "16",
+        "name": "Ongoing",
+        "stage": "ongoing",
+        "owner": "human",
+        "purpose": "Sustain and improve the application after launch.",
+        "deliverables": [
+          "Weekly: review Sentry for new errors, address any critical issues",
+          "Monthly: review Core Web Vitals, check for dependency updates",
+          "Feature additions follow the same Phase 0 → Design → Build → Test → Extract process",
+          "Database migrations tested against production data before applying"
+        ],
+        "advance_criteria": []
+      }
+    ],
+    "milestones": [
+      {
+        "id": "A",
+        "after_phase": "10",
+        "label": "Build complete — hand off to human for launch"
+      },
+      {
+        "id": "B",
+        "after_phase": "15",
+        "label": "App live — transitions to ongoing"
+      }
+    ]
+  },
+  "roadmap": "0. Planning & DDD: event-storming → define-bounded-contexts → design-aggregates → model-domain-events → ubiquitous-language (run before writing any code)\n1. Scaffold: framework, TypeScript, CI, database connection\n2. Core Schema: migrations, ORM models, seed data\nD. Design: user flows, page inventory, component hierarchy, design tokens, mobile plan\n3. Core Features: CRUD, API validation, UI, loading/error states\n4. Auth: provider integration, protected routes, role enforcement\n5. Testing: unit, integration, E2E for critical paths\n6. Polish: mobile audit, a11y, performance, production config\n7. Extract: RAG ingest, skill files, decisions\n8. QA Gate: human-verified full feature test\n9. Support Audit: error state inventory\n10. Support Automation: FAQ, error messages, playbook\n[Milestone A — hand off to human]\n11. Infrastructure: hosting, domain, env vars\n12. Staging & Smoke Test\n13. Legal & Compliance\n14. Monitoring Setup\n15. Go Live\n[Milestone B — ongoing]\n16. Ongoing: weekly/monthly cadence",
+  "skills": [
+    "skills/storybook-setup",
+    "skills/component-types",
+    "skills/state-solutions",
+    "skills/component-testing",
+    "skills/add-api-endpoint",
+    "skills/add-database-table",
+    "skills/add-authentication",
+    "skills/write-integration-tests",
+    "skills/error-handling-middleware",
+    "skills/production-config-and-secrets",
+    "skills/setup-health-and-observability",
+    "skills/security-hardening"
+  ],
+  "name": "antinet-pwa",
+  "project_class": "software",
+  "framework": null,
+  "created_at": "2026-11-21T15:43:52.762Z"
+}

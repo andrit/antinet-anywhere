@@ -2,19 +2,21 @@
 
 _Overwritten each session. Read first on resume. Not the only copy of anything._
 
-## Last step (2026-11-22)
-- Phase 0 DDD docs **ratified/gated** (grammar, ubiquitous-language, bounded-contexts, domain-events in `design/`).
-- **Address core + Zod card schemas BUILT test-first** — all in `lib/antinet/` (pure, no Mongo/React):
-  `letters.ts`, `address.ts` (+`addressSchema`), `main-card.ts`, `bib-card.ts`, `index-card.ts`.
-  Pattern: InputSchema → `.extend` Document schema → pure `newX(input, now)` builder (clock injected).
-  114 tests; `npm run verify` green; lib/antinet 100% lines/funcs, ~97% branch.
+## Last step (2026-11-23)
+- Initial commit `22718fd` (git init, no remote).
+- **Collection access BUILT** — `lib/antinet/`: `queries.ts` (pure+tested), `collections.ts` (DI getters +
+  `ensureAntinetIndexes`), repos `main-card-repo.ts`/`bib-card-repo.ts`/`index-card-repo.ts` (I/O shells, v8-ignored).
+  Main repo covers the full circuit: insert/get, next/prevCard, childrenOf, backlinksTo, mainCardsCiting.
+  128 tests; `npm run verify` green; lib/antinet 100% lines/funcs, ~97.7% branch.
+- (Prior: Phase 0 docs ratified; address core + Zod card schemas built.)
 
-## Next step
-- **Collection access** — thin imperative shell over `db()` (from `lib/db.ts`) for `main_cards`/`bib_cards`/`index_cards`:
-  insert a built card, find by `_id`, neighbor/children queries by `sortKey` (box-flipping + Create-modal context),
-  backlinks (`find({ links })`), "who cites this" (`find({ 'citations.bibId' })`).
-- **Startup indexes**: `main_cards` sortKey asc + text(title,body); `bib_cards` authorSort.
-- Then wire the thin **closed circuit** (slice 1 API routes + minimal UI).
+## Next step — wire the thin closed circuit (slice 1): API + minimal UI
+- **API routes** (imperative shell: `import { db } from "@/lib/db"`, pass `db()` into repos):
+  create a card in each box; get a Main card + its citations/links/backlinks; Index keyword → entry-point Main cards;
+  Bib card → who-cites (mainCardsCiting). Validate request bodies with the Zod Input schemas; build via `newX(input, now)`.
+- Call `ensureAntinetIndexes(db())` at startup.
+- **Minimal UI** for the above (create + view across the three boxes; box-flip prev/next).
+- Generate/validate the OpenAPI contract for the routes (CLAUDE.md API-doc requirement).
 
 ## Load first on resume
 1. `TODO.md` (this)

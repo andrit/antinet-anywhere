@@ -10,17 +10,16 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
   150 tests; `npm run verify` green; lib/antinet 100% lines/funcs, ~97.3% branch.
 - (Prior: initial commit `22718fd`; collection access `71eb5c4`; CHANGELOG added.)
 
-## Not yet verified / deferred
-- **Routes NOT exercised against a live Mongo** (no mongod in-container). Need a real DB round-trip:
-  run Mongo (`docker run -p 27017:27017 mongo`), set `.env` (DATABASE_URL, DB_NAME), `npm run dev`, curl.
-- **ensureAntinetIndexes not auto-wired at startup** (fragile hook + no DB at build; Mongo auto-indexes
-  `_id` so create/409 works; sortKey/text/authorSort are perf/feature-only). Wire via a migrate/seed
-  script or instrumentation in a later phase.
+## Verified / deferred
+- **Circuit VERIFIED LIVE** via `npm run smoke` (`lib/antinet/circuit.smoke.ts` + `vitest.smoke.config.ts`):
+  in-memory Mongo (`mongodb-memory-server`, devDep), drives the real API handlers end-to-end. Out of
+  `verify`. arm64 handled in-file (pins Ubuntu 22.04 / Mongo 7.0.14).
+- **ensureAntinetIndexes not auto-wired at startup** (deferred; Mongo auto-indexes `_id` so create/409
+  works; sortKey/text/authorSort are perf/feature-only). Wire via a migrate/seed script later.
 
 ## Next step
 - **OpenAPI contract** for the routes (CLAUDE.md: a feature isn't done until its API contract is documented).
 - **Minimal UI**: create + view across the three boxes; box-flip prev/next; Index→Main; Bib→who-cites.
-- Live smoke test of the circuit end-to-end against Mongo.
 
 ## Load first on resume
 1. `TODO.md` (this)

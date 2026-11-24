@@ -1,0 +1,112 @@
+/**
+ * End-to-end smoke test for the slice-1 circuit: stands up a real (in-memory) MongoDB and drives the
+ * actual API route handlers, proving the whole loop turns against a live database — create in each
+ * box, then traverse (children, backlinks, citations, entry points, box-flipping) and the error
+ * paths (409 duplicate, 400 invalid, 404 missing).
+ *
+ * Not part of `npm run verify`. Run with: npx vitest run --config vitest.smoke.config.ts
+ */
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { MongoMemoryServer } from "mongodb-memory-server";
+
+import { POST as createMain } from "@/app/api/main/route";
+import { GET as getMain } from "@/app/api/main/[...id]/route";
+import { POST as createBib } from "@/app/api/bib/route";
+import { GET as getBib } from "@/app/api/bib/[id]/route";
+import { POST as createIndex } from "@/app/api/index/route";
+import { GET as getIndex } from "@/app/api/index/[id]/route";
+
+let mongod: MongoMemoryServer;
+
+beforeAll(async () => {
+  // MongoDB doesn't publish a debian12-aarch64 build for the memory-server's default version, so on
+  // Linux arm64 we pin an Ubuntu 22.04 build, which does have arm64 releases. Override either with
+  // MONGOMS_DISTRO / MONGOMS_VERSION; other platforms auto-detect normally.
+  if (process.platform === "linux" && process.arch === "arm64" && !process.env.MONGOMS_DISTRO) {
+    process.env.MONGOMS_DISTRO = "ubuntu-22.04";
+  }
+  mongod = await MongoMemoryServer.create({
+    binary: { version: process.env.MONGOMS_VERSION ?? "7.0.14" },
+  });
+  process.env.DATABASE_URL = mongod.getUri();
+  process.env.DB_NAME = "antinet_smoke";
+});
+
+afterAll(async () => {
+  await mongod?.stop();
+});
+
+const post = (handler: (r: Request) => Promise<Response>, body: unknown): Promise<Response> =>
+  handler(
+    new Request("http://smoke/", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  );
+
+const getById = (
+  handler: (r: Request, ctx: { params: { id: string } }) => Promise<Response>,
+  id: string,
+): Promise<Response> => handler(new Request("http://smoke/"), { params: { id } });
+
+const getMainByAddress = (segments: string[]): Promise<Response> =>
+  getMain(new Request("http://smoke/"), { params: { id: segments } });
+
+describe("the antinet circuit (live MongoDB)", () => {
+  it("turns end to end: create across all three boxes, then traverse", async () => {
+    // --- Create a source in the Bib Box ---
+    expect((await post(createBib, {
+      _id: "kahneman_2011",
+      authorSort: "Kahneman, Daniel",
+      title: "Thinking, Fast and Slow",
+      year: 2011,
+    })).status).toBe(201);
+
+    // --- Create Main cards: a root note and two children; one child cites the source and links up ---
+    expect((await post(createMain, { _id: "3200/4", title: "Dual process", body: "Root note." })).status).toBe(201);
+    expect((await post(createMain, {
+      _id: "3200/4A",
+      title: "System 1",
+      body: "Fast, automatic.",
+      links: ["3200/4"],
+      citations: [{ bibId: "kahneman_2011", page: "85" }],
+    })).status).toBe(201);
+    expect((await post(createMain, { _id: "3200/4B", title: "System 2", body: "Slow, effortful." })).status).toBe(201);
+
+    // --- Register an Index keyword pointing into the Main Box ---
+    expect((await post(createIndex, {
+      _id: "Cognitive Bias",
+      displayTerm: "Cognitive Bias",
+      entryPoints: ["3200/4A", "3200/4"],
+    })).status).toBe(201);
+
+    // --- Error paths ---
+    expect((await post(createMain, { _id: "3200/4", title: "dup", body: "dup" })).status).toBe(409); // duplicate _id
+    expect((await post(createMain, { _id: "3200/B", title: "bad", body: "bad" })).status).toBe(400); // invalid address
+    expect((await getMainByAddress(["9999", "1"])).status).toBe(404); // missing
+
+    // --- Traverse the Main Box: children + backlinks + box-flipping ---
+    const mainRes = await getMainByAddress(["3200", "4"]);
+    expect(mainRes.status).toBe(200);
+    const main = await mainRes.json();
+    expect(main.card._id).toBe("3200/4");
+    expect(main.children.map((c: { _id: string }) => c._id).sort()).toEqual(["3200/4A", "3200/4B"]);
+    expect(main.backlinks.map((c: { _id: string }) => c._id)).toContain("3200/4A"); // 4A links to 4
+    expect(main.next?._id).toBe("3200/4A"); // box-flipping forward
+
+    // --- Provenance: the Bib card knows who cites it ---
+    const bibRes = await getById(getBib, "kahneman_2011");
+    expect(bibRes.status).toBe(200);
+    const bib = await bibRes.json();
+    expect(bib.citedBy.map((c: { _id: string }) => c._id)).toContain("3200/4A");
+
+    // --- Top-down: the Index keyword resolves its entry points to real Main cards ---
+    const indexRes = await getById(getIndex, "cognitive bias");
+    expect(indexRes.status).toBe(200);
+    const index = await indexRes.json();
+    expect(index.card._id).toBe("cognitive bias");
+    const resolved = index.entries.find((e: { address: string }) => e.address === "3200/4A");
+    expect(resolved?.card?.title).toBe("System 1");
+  });
+});

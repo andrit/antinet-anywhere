@@ -9,6 +9,8 @@ the per-commit record; this file is the human-readable summary, grouped by relea
 
 ### Added
 
+- User guide (`docs/user-guide.md`): starting MongoDB and the app, doing the core tasks in the UI and
+  via the API, querying the database with `mongosh`, and troubleshooting.
 - Slice-1 web UI at `/`: a single page with Main / Bib / Index panels — create a card in each box and
   traverse the whole circuit by clicking addresses (children, links, backlinks, citations, box-flip;
   Index → Main; Bib → who-cites). Semantic design tokens (light + dark via `prefers-color-scheme`);

@@ -69,6 +69,23 @@ export interface PromoteBody {
 export const promoteNote = (slug: string, body: PromoteBody): Promise<ApiResult<{ main: MainCard; bib: BibCard }>> =>
   postJson(`/api/bib/${encodeURIComponent(slug)}/promote`, body);
 
+export interface BrowseItem {
+  _id: string;
+  label: string;
+}
+
+export async function browseBib(letter: string): Promise<ApiResult<BrowseItem[]>> {
+  const r = await request<BibCard[]>(`/api/bib?letter=${encodeURIComponent(letter)}`);
+  if (!r.ok || !r.data) return { ok: r.ok, status: r.status, data: null, error: r.error };
+  return { ok: true, status: r.status, data: r.data.map((c) => ({ _id: c._id, label: `${c.authorSort} — ${c.title}` })) };
+}
+
+export async function browseIndex(letter: string): Promise<ApiResult<BrowseItem[]>> {
+  const r = await request<IndexCard[]>(`/api/index?letter=${encodeURIComponent(letter)}`);
+  if (!r.ok || !r.data) return { ok: r.ok, status: r.status, data: null, error: r.error };
+  return { ok: true, status: r.status, data: r.data.map((c) => ({ _id: c._id, label: c.displayTerm })) };
+}
+
 const del = <T,>(url: string): Promise<ApiResult<T>> => request<T>(url, { method: "DELETE" });
 export const deleteMain = (address: string): Promise<ApiResult<{ deleted: string }>> => del(`/api/main/${address}`);
 export const deleteBib = (slug: string): Promise<ApiResult<{ deleted: string }>> =>

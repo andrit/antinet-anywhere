@@ -18,6 +18,10 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
 - **Slice-1 circuit now complete end-to-end**: schemas → repos → routes → OpenAPI → UI; API verified
   live via `npm run smoke`.
 
+- **Slice 4 — A–Z browsing DONE** (plan `design/slice-4-az-browsing.md`): pure `lib/antinet/browse.ts`
+  (`escapeRegExp`/`prefixMatcher`, +tests); repo `bibCardsByLetter`/`indexCardsByLetter`; `GET /api/bib`
+  and `GET /api/index` (optional `?letter=`); OpenAPI browse ops; smoke extended; UI `AzBrowser` in both
+  panels. 174 tests; verify + smoke green; lib/antinet 100% lines/funcs.
 - **Slice 3 — Deletion & referential integrity DONE** (plan `design/slice-3-referential-integrity.md`):
   pure `lib/antinet/integrity.ts` `partitionIndexRefs` (+tests); repo delete/pull ops; `DELETE` on all
   three routes (bib blocked-if-cited 409; main cascade heals links + pulls entry points + drops emptied
@@ -39,8 +43,8 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
 ## Next step
 - **Human/browser QA** (roadmap phase 8): stand up Mongo + `npm run dev`, click slices 1–2 in a browser.
   All UI is build-verified only (no browser/Mongo in-container); the APIs are smoke-verified.
-- Then pick the next slice: address **suggester** or **A–Z browsing** (referential integrity is now
-  done for deletes). Also wire `ensureAntinetIndexes` at startup; consider Atlas + Vercel deploy docs.
+- Then pick the next slice: address **suggester** (the last of the four deferred items; sibling/child/
+  parent already exist in the core — mostly surfacing them). Also wire `ensureAntinetIndexes` at startup.
 
 ## Load first on resume
 1. `TODO.md` (this)

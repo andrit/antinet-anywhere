@@ -4,6 +4,7 @@ import { Banner, Field, Button } from "./atoms";
 import { MainForm, BibForm, IndexForm } from "./forms";
 import { MainView, BibView, IndexView } from "./viewers";
 import { BibNotes } from "./bib-notes";
+import { AzBrowser } from "./az-browser";
 import {
   getMain,
   getBib,
@@ -11,6 +12,8 @@ import {
   deleteMain,
   deleteBib,
   deleteIndex,
+  browseBib,
+  browseIndex,
   type ApiResult,
   type MainView as MV,
   type BibView as BV,
@@ -88,6 +91,7 @@ export function AntinetApp() {
           <h2>Bib Box</h2>
           <BibForm onCreated={nav.openBib} onError={nav.setErr} />
           <OpenRow label="Open slug" placeholder="kahneman_2011" onOpen={nav.openBib} />
+          <AzBrowser browse={browseBib} onOpen={nav.openBib} onError={nav.setErr} />
           {nav.bib && (
             <>
               <BibView view={nav.bib} onOpen={nav.openMain} onDelete={nav.removeBib} />
@@ -99,6 +103,7 @@ export function AntinetApp() {
           <h2>Index Box</h2>
           <IndexForm onCreated={nav.openIndex} onError={nav.setErr} />
           <OpenRow label="Open keyword" placeholder="cognitive bias" onOpen={nav.openIndex} />
+          <AzBrowser browse={browseIndex} onOpen={nav.openIndex} onError={nav.setErr} />
           {nav.index && <IndexView view={nav.index} onOpen={nav.openMain} onDelete={nav.removeIndex} />}
         </section>
       </div>

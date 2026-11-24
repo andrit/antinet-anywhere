@@ -196,3 +196,21 @@ body {
 .actions {
   margin-top: var(--space-4);
 }
+.azbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: var(--space-2);
+}
+.azkey {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 2px;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}

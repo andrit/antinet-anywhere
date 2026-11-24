@@ -9,6 +9,9 @@ the per-commit record; this file is the human-readable summary, grouped by relea
 
 ### Added
 
+- A–Z browsing: pick a letter to list Bib cards by author (`GET /api/bib?letter=`) or Index cards by
+  keyword (`GET /api/index?letter=`); an A–Z bar in both panels, with results that click through to the
+  card. Prefix matching is regex-injection-safe.
 - Deletion with referential integrity: `DELETE` for all three boxes, with Delete buttons on each card
   view. Deleting a Bib card is **blocked (409, listing the citers)** while any Main card cites it;
   deleting a Main card **heals backlinks**, pulls it from Index entry points, and **drops any Index

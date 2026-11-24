@@ -2,8 +2,9 @@
  * IndexCard repository — imperative shell for the Index Box. Database I/O only; `Db` is injected.
  * Excluded from coverage like the other repositories.
  */
-import type { Db, UpdateFilter } from "mongodb";
+import type { Db, Filter, UpdateFilter } from "mongodb";
 import { indexCards } from "./collections";
+import { prefixMatcher } from "./browse";
 import type { IndexCard } from "./index-card";
 
 /* v8 ignore start -- database I/O only. */
@@ -37,6 +38,12 @@ export async function pullEntryPointFromAll(db: Db, address: string): Promise<nu
 /** Delete Index cards left with no entry points (e.g. after a pull); returns how many. */
 export async function deleteEmptyIndexCards(db: Db): Promise<number> {
   return (await indexCards(db).deleteMany({ entryPoints: { $size: 0 } })).deletedCount;
+}
+
+/** Index cards whose keyword starts with `letter` (A–Z browse); all of them if `letter` is empty. */
+export async function indexCardsByLetter(db: Db, letter: string): Promise<IndexCard[]> {
+  const filter: Filter<IndexCard> = letter ? { _id: prefixMatcher(letter) } : {};
+  return indexCards(db).find(filter).sort({ _id: 1 }).toArray();
 }
 
 /* v8 ignore stop */

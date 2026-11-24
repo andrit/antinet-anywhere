@@ -43,7 +43,19 @@ const toJson = (schema: z.ZodTypeAny) =>
 
 const ref = (name: string) => ({ $ref: `#/components/schemas/${name}` });
 const jsonBody = (name: string) => ({ "application/json": { schema: ref(name) } });
+const jsonArray = (name: string) => ({ "application/json": { schema: { type: "array", items: ref(name) } } });
 const errorResponse = (description: string) => ({ description, content: jsonBody("Error") });
+
+function browseOp(resource: string, itemName: string, example: string) {
+  return {
+    summary: `Browse ${resource} cards A–Z (optional letter prefix)`,
+    parameters: [{ name: "letter", in: "query", required: false, schema: { type: "string" }, example }],
+    responses: {
+      "200": { description: `${resource} cards, sorted`, content: jsonArray(itemName) },
+      "500": errorResponse("Server error"),
+    },
+  };
+}
 
 function createOp(resource: string, inputName: string, outputName: string, idWord: string) {
   return {
@@ -128,7 +140,7 @@ function buildMainPaths() {
 
 function buildBibPaths() {
   return {
-    "/api/bib": { post: createOp("Bib", "BibCardInput", "BibCard", "slug") },
+    "/api/bib": { post: createOp("Bib", "BibCardInput", "BibCard", "slug"), get: browseOp("Bib", "BibCard", "K") },
     "/api/bib/{slug}": {
       get: getOp({
         summary: "Get a Bib card and every Main card that cites it",
@@ -150,7 +162,7 @@ function buildBibPaths() {
 
 function buildIndexPaths() {
   return {
-    "/api/index": { post: createOp("Index", "IndexCardInput", "IndexCard", "keyword") },
+    "/api/index": { post: createOp("Index", "IndexCardInput", "IndexCard", "keyword"), get: browseOp("Index", "IndexCard", "C") },
     "/api/index/{keyword}": {
       get: getOp({
         summary: "Get an Index card with its entry points resolved to Main cards",

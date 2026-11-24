@@ -11,9 +11,9 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 
 import { POST as createMain } from "@/app/api/main/route";
 import { GET as getMain, DELETE as deleteMainRoute } from "@/app/api/main/[...id]/route";
-import { POST as createBib } from "@/app/api/bib/route";
+import { POST as createBib, GET as listBib } from "@/app/api/bib/route";
 import { GET as getBib, DELETE as deleteBibRoute } from "@/app/api/bib/[id]/route";
-import { POST as createIndex } from "@/app/api/index/route";
+import { POST as createIndex, GET as listIndex } from "@/app/api/index/route";
 import { GET as getIndex, DELETE as deleteIndexRoute } from "@/app/api/index/[id]/route";
 import { POST as addNote } from "@/app/api/bib/[id]/notes/route";
 import { POST as promoteNote } from "@/app/api/bib/[id]/promote/route";
@@ -77,6 +77,9 @@ const deleteById = (
 const deleteMainByAddress = (segments: string[]): Promise<Response> =>
   deleteMainRoute(new Request("http://smoke/", { method: "DELETE" }), { params: { id: segments } });
 
+const getList = (handler: (r: Request) => Promise<Response>, query: string): Promise<Response> =>
+  handler(new Request(`http://smoke/?${query}`));
+
 describe("the antinet circuit (live MongoDB)", () => {
   it("turns end to end: create across all three boxes, then traverse", async () => {
     // --- Create a source in the Bib Box ---
@@ -132,6 +135,10 @@ describe("the antinet circuit (live MongoDB)", () => {
     expect(index.card._id).toBe("cognitive bias");
     const resolved = index.entries.find((e: { address: string }) => e.address === "3200/4A");
     expect(resolved?.card?.title).toBe("System 1");
+
+    // --- Slice 4: A–Z browse ---
+    expect((await (await getList(listBib, "letter=K")).json()).map((c: { _id: string }) => c._id)).toContain("kahneman_2011");
+    expect((await (await getList(listIndex, "letter=C")).json()).map((c: { _id: string }) => c._id)).toContain("cognitive bias");
 
     // --- Slice 2: add a reading note, then promote it into a Main card ---
     const noteRes = await postTo(addNote, "kahneman_2011", { page: "99", note: "Anchoring heuristic" });

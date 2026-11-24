@@ -11,6 +11,17 @@ export interface ApiError {
   body: { error: string; details?: unknown };
 }
 
+/** A domain error that carries the HTTP status it should map to (e.g. 404, 409). */
+export class HttpError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "HttpError";
+  }
+}
+
 /** True for a MongoDB duplicate-key error (E11000) — a card with that id already exists. */
 export function isDuplicateKeyError(err: unknown): boolean {
   return (
@@ -23,6 +34,9 @@ export function isDuplicateKeyError(err: unknown): boolean {
 
 /** Map any thrown value to a status + body. */
 export function toApiError(err: unknown): ApiError {
+  if (err instanceof HttpError) {
+    return { status: err.status, body: { error: err.message } };
+  }
   if (err instanceof ZodError) {
     return { status: 400, body: { error: "Validation failed", details: err.flatten() } };
   }

@@ -11,6 +11,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { MainCardInputSchema, MainCardSchema } from "./main-card";
 import { BibCardInputSchema, BibCardSchema } from "./bib-card";
 import { IndexCardInputSchema, IndexCardSchema } from "./index-card";
+import { AddReadingNoteSchema, PromoteSchema } from "./promote";
 import pkg from "../../package.json";
 
 // Response envelopes — composed from the single-source card schemas, so no field is restated.
@@ -24,6 +25,7 @@ const MainCardViewSchema = z.object({
   next: MainCardSchema.nullable(),
 });
 const BibCardViewSchema = z.object({ card: BibCardSchema, citedBy: z.array(MainCardSchema) });
+const PromoteResultSchema = z.object({ main: MainCardSchema, bib: BibCardSchema });
 const IndexCardViewSchema = z.object({
   card: IndexCardSchema,
   entries: z.array(z.object({ address: z.string(), card: MainCardSchema.nullable() })),
@@ -107,6 +109,41 @@ function buildPaths() {
   };
 }
 
+function buildPromotePaths() {
+  const slugParam = [
+    { name: "slug", in: "path", required: true, schema: { type: "string" }, example: "kahneman_2011" },
+  ];
+  return {
+    "/api/bib/{slug}/notes": {
+      post: {
+        summary: "Add a reading note to a Bib card",
+        parameters: slugParam,
+        requestBody: { required: true, content: jsonBody("AddReadingNote") },
+        responses: {
+          "201": { description: "The updated Bib card", content: jsonBody("BibCard") },
+          "400": errorResponse("Invalid body"),
+          "404": errorResponse("Bib card not found"),
+          "500": errorResponse("Server error"),
+        },
+      },
+    },
+    "/api/bib/{slug}/promote": {
+      post: {
+        summary: "Promote a reading note into a new Main card",
+        parameters: slugParam,
+        requestBody: { required: true, content: jsonBody("Promote") },
+        responses: {
+          "201": { description: "The new Main card and the updated Bib card", content: jsonBody("PromoteResult") },
+          "400": errorResponse("Invalid body"),
+          "404": errorResponse("Bib card or note not found"),
+          "409": errorResponse("Address exists, or the note was already promoted"),
+          "500": errorResponse("Server error"),
+        },
+      },
+    },
+  };
+}
+
 function buildComponents() {
   return {
     schemas: {
@@ -119,6 +156,9 @@ function buildComponents() {
       IndexCardInput: toJson(IndexCardInputSchema),
       IndexCard: toJson(IndexCardSchema),
       IndexCardView: toJson(IndexCardViewSchema),
+      AddReadingNote: toJson(AddReadingNoteSchema),
+      Promote: toJson(PromoteSchema),
+      PromoteResult: toJson(PromoteResultSchema),
       Error: toJson(ErrorSchema),
     },
   };
@@ -135,7 +175,7 @@ export function buildOpenApiDocument() {
         "Slice-1 antinet circuit: create cards in the three boxes (Main, Bib, Index) and traverse " +
         "the links between them.",
     },
-    paths: buildPaths(),
+    paths: { ...buildPaths(), ...buildPromotePaths() },
     components: buildComponents(),
   };
 }

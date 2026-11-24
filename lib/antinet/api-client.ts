@@ -55,3 +55,16 @@ export const getBib = (slug: string): Promise<ApiResult<BibView>> =>
   request(`/api/bib/${encodeURIComponent(slug)}`);
 export const getIndex = (keyword: string): Promise<ApiResult<IndexView>> =>
   request(`/api/index/${encodeURIComponent(keyword)}`);
+
+const postJson = <T,>(url: string, body: unknown): Promise<ApiResult<T>> =>
+  request<T>(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+
+export const addReadingNote = (slug: string, note: { page: string; note: string }): Promise<ApiResult<BibCard>> =>
+  postJson(`/api/bib/${encodeURIComponent(slug)}/notes`, note);
+
+export interface PromoteBody {
+  noteIndex: number;
+  main: { _id: string; title: string; body: string; links?: string[] };
+}
+export const promoteNote = (slug: string, body: PromoteBody): Promise<ApiResult<{ main: MainCard; bib: BibCard }>> =>
+  postJson(`/api/bib/${encodeURIComponent(slug)}/promote`, body);

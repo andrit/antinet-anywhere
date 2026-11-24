@@ -9,6 +9,10 @@ the per-commit record; this file is the human-readable summary, grouped by relea
 
 ### Added
 
+- Promote (Bib → Main) workflow — the core reading loop: add reading notes to a Bib card
+  (`POST /api/bib/<slug>/notes`) and promote one into a new Main card that cites the source
+  (`POST /api/bib/<slug>/promote`), marking the note done. Surfaced in the Bib panel (notes list +
+  add-note + promote forms). Cross-aggregate and non-atomic by design; verified live by the smoke test.
 - User guide (`docs/user-guide.md`): starting MongoDB and the app, doing the core tasks in the UI and
   via the API, querying the database with `mongosh`, and troubleshooting.
 - Slice-1 web UI at `/`: a single page with Main / Bib / Index panels — create a card in each box and

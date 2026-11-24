@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
-import { toApiError, isDuplicateKeyError } from "./api-errors";
+import { toApiError, isDuplicateKeyError, HttpError } from "./api-errors";
 
 describe("isDuplicateKeyError", () => {
   it.each([
@@ -22,6 +22,12 @@ describe("toApiError", () => {
     expect(api.status).toBe(400);
     expect(api.body.error).toBe("Validation failed");
     expect(api.body.details).toBeDefined();
+  });
+
+  it("maps an HttpError to its own status and message", () => {
+    const api = toApiError(new HttpError(404, "Bib card not found"));
+    expect(api.status).toBe(404);
+    expect(api.body.error).toBe("Bib card not found");
   });
 
   it("maps invalid JSON (SyntaxError) to 400", () => {

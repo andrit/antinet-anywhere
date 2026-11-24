@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Banner, Field, Button } from "./atoms";
 import { MainForm, BibForm, IndexForm } from "./forms";
 import { MainView, BibView, IndexView } from "./viewers";
+import { BibNotes } from "./bib-notes";
 import {
   getMain,
   getBib,
@@ -70,7 +71,12 @@ export function AntinetApp() {
           <h2>Bib Box</h2>
           <BibForm onCreated={nav.openBib} onError={nav.setErr} />
           <OpenRow label="Open slug" placeholder="kahneman_2011" onOpen={nav.openBib} />
-          {nav.bib && <BibView view={nav.bib} onOpen={nav.openMain} />}
+          {nav.bib && (
+            <>
+              <BibView view={nav.bib} onOpen={nav.openMain} />
+              <BibNotes bib={nav.bib.card} onOpen={nav.openMain} onError={nav.setErr} onRefresh={nav.openBib} />
+            </>
+          )}
         </section>
         <section className="panel">
           <h2>Index Box</h2>

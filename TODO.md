@@ -18,6 +18,11 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
 - **Slice-1 circuit now complete end-to-end**: schemas → repos → routes → OpenAPI → UI; API verified
   live via `npm run smoke`.
 
+- **Slice 2 — Promote (Bib→Main) workflow DONE** (plan `design/slice-2-promote.md`): pure core
+  `lib/antinet/promote.ts` (+tests) + `HttpError` in `api-errors.ts`; repo `addReadingNote`/`markNotePromoted`;
+  routes `POST /api/bib/[id]/notes` + `/promote`; OpenAPI + smoke extended; UI `app/_components/bib-notes.tsx`.
+  165 tests; `npm run verify` + `npm run smoke` green; lib/antinet 100% lines/funcs. Note identity = array index.
+
 ## Verified / deferred
 - **Circuit VERIFIED LIVE** via `npm run smoke` (`lib/antinet/circuit.smoke.ts` + `vitest.smoke.config.ts`):
   in-memory Mongo (`mongodb-memory-server`, devDep), drives the real API handlers end-to-end. Out of
@@ -26,10 +31,10 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
   works; sortKey/text/authorSort are perf/feature-only). Wire via a migrate/seed script later.
 
 ## Next step
-- **Human/browser QA of slice 1** (roadmap phase 8 QA gate): stand up Mongo + `npm run dev`, click the
-  circuit in a browser. The UI is build-verified only (no browser/Mongo in-container).
-- Then pick the next slice: Bib→Main **promote** workflow, A–Z browsing, the address **suggester**, or
-  **referential integrity** (dangling refs currently allowed). Also wire `ensureAntinetIndexes` at startup.
+- **Human/browser QA** (roadmap phase 8): stand up Mongo + `npm run dev`, click slices 1–2 in a browser.
+  All UI is build-verified only (no browser/Mongo in-container); the APIs are smoke-verified.
+- Then pick the next slice: address **suggester**, **A–Z browsing**, or **referential integrity**
+  (dangling refs still allowed). Also wire `ensureAntinetIndexes` at startup.
 
 ## Load first on resume
 1. `TODO.md` (this)

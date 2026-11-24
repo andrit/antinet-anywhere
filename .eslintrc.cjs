@@ -12,7 +12,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["**/*.test.ts", "**/*.test.tsx"],
+      files: ["**/*.test.ts", "**/*.test.tsx", "**/*.smoke.ts"],
       rules: { "max-lines-per-function": "off" },
     },
     // WITHDRAWN 2026-09-07 — a rule banning database/network clients from lib/ was drafted here and

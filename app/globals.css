@@ -188,3 +188,8 @@ body {
 .muted {
   color: var(--text-muted);
 }
+.note {
+  margin: var(--space-2) 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}

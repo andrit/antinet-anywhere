@@ -13,6 +13,8 @@ describe("OpenAPI contract", () => {
     expect(Object.keys(doc.paths).sort()).toEqual([
       "/api/bib",
       "/api/bib/{slug}",
+      "/api/bib/{slug}/notes",
+      "/api/bib/{slug}/promote",
       "/api/index",
       "/api/index/{keyword}",
       "/api/main",
@@ -32,6 +34,9 @@ describe("OpenAPI contract", () => {
       "IndexCardInput",
       "IndexCard",
       "IndexCardView",
+      "AddReadingNote",
+      "Promote",
+      "PromoteResult",
       "Error",
     ]) {
       expect(names).toContain(name);

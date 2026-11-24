@@ -23,7 +23,8 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["lib/**/*.ts"],
-      exclude: ["**/*.test.ts", "**/*.smoke.ts"],
+      // api-client.ts is the browser-side fetch shell (no logic to unit-test, like the repos).
+      exclude: ["**/*.test.ts", "**/*.smoke.ts", "lib/antinet/api-client.ts"],
       thresholds: {
         lines: 80,
         functions: 80,

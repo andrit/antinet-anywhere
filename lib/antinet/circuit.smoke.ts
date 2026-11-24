@@ -15,6 +15,8 @@ import { POST as createBib } from "@/app/api/bib/route";
 import { GET as getBib } from "@/app/api/bib/[id]/route";
 import { POST as createIndex } from "@/app/api/index/route";
 import { GET as getIndex } from "@/app/api/index/[id]/route";
+import { POST as addNote } from "@/app/api/bib/[id]/notes/route";
+import { POST as promoteNote } from "@/app/api/bib/[id]/promote/route";
 
 let mongod: MongoMemoryServer;
 
@@ -52,6 +54,20 @@ const getById = (
 
 const getMainByAddress = (segments: string[]): Promise<Response> =>
   getMain(new Request("http://smoke/"), { params: { id: segments } });
+
+const postTo = (
+  handler: (r: Request, ctx: { params: { id: string } }) => Promise<Response>,
+  id: string,
+  body: unknown,
+): Promise<Response> =>
+  handler(
+    new Request("http://smoke/", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+    { params: { id } },
+  );
 
 describe("the antinet circuit (live MongoDB)", () => {
   it("turns end to end: create across all three boxes, then traverse", async () => {
@@ -108,5 +124,27 @@ describe("the antinet circuit (live MongoDB)", () => {
     expect(index.card._id).toBe("cognitive bias");
     const resolved = index.entries.find((e: { address: string }) => e.address === "3200/4A");
     expect(resolved?.card?.title).toBe("System 1");
+
+    // --- Slice 2: add a reading note, then promote it into a Main card ---
+    const noteRes = await postTo(addNote, "kahneman_2011", { page: "99", note: "Anchoring heuristic" });
+    expect(noteRes.status).toBe(201);
+    expect((await noteRes.json()).readingNotes).toHaveLength(1);
+
+    const promoteRes = await postTo(promoteNote, "kahneman_2011", {
+      noteIndex: 0,
+      main: { _id: "3200/7", title: "Anchoring", body: "Estimates cling to an initial value." },
+    });
+    expect(promoteRes.status).toBe(201);
+    const promoted = await promoteRes.json();
+    expect(promoted.main._id).toBe("3200/7");
+    expect(promoted.bib.readingNotes[0].processedToMainId).toBe("3200/7"); // note marked
+
+    // the promoted card cites the source, so it shows up in the Bib's provenance
+    const bibAfter = await getById(getBib, "kahneman_2011");
+    expect((await bibAfter.json()).citedBy.map((c: { _id: string }) => c._id)).toContain("3200/7");
+
+    // re-promoting the same note -> 409; a bad index -> 404
+    expect((await postTo(promoteNote, "kahneman_2011", { noteIndex: 0, main: { _id: "3200/8", title: "x", body: "y" } })).status).toBe(409);
+    expect((await postTo(promoteNote, "kahneman_2011", { noteIndex: 9, main: { _id: "3200/9", title: "x", body: "y" } })).status).toBe(404);
   });
 });

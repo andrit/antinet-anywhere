@@ -23,7 +23,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["lib/**/*.ts"],
-      exclude: ["**/*.test.ts"],
+      exclude: ["**/*.test.ts", "**/*.smoke.ts"],
       thresholds: {
         lines: 80,
         functions: 80,

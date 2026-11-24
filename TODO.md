@@ -10,6 +10,9 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
   150 tests; `npm run verify` green; lib/antinet 100% lines/funcs, ~97.3% branch.
 - (Prior: initial commit `22718fd`; collection access `71eb5c4`; CHANGELOG added.)
 
+- **OpenAPI contract DONE** — `lib/antinet/openapi.ts` generates it from the Zod schemas (via
+  `zod-to-json-schema`); served at `GET /api/openapi`; `openapi.test.ts` guards it. 155 tests, verify green.
+
 ## Verified / deferred
 - **Circuit VERIFIED LIVE** via `npm run smoke` (`lib/antinet/circuit.smoke.ts` + `vitest.smoke.config.ts`):
   in-memory Mongo (`mongodb-memory-server`, devDep), drives the real API handlers end-to-end. Out of
@@ -18,8 +21,8 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
   works; sortKey/text/authorSort are perf/feature-only). Wire via a migrate/seed script later.
 
 ## Next step
-- **OpenAPI contract** for the routes (CLAUDE.md: a feature isn't done until its API contract is documented).
-- **Minimal UI**: create + view across the three boxes; box-flip prev/next; Index→Main; Bib→who-cites.
+- **Minimal UI** (slice-1 "done" remaining): create + view across the three boxes; box-flip prev/next;
+  Index→Main; Bib→who-cites. (Design phase D artifacts may come first — see roadmap.)
 
 ## Load first on resume
 1. `TODO.md` (this)

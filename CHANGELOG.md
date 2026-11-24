@@ -15,6 +15,8 @@ the per-commit record; this file is the human-readable summary, grouped by relea
   (the source plus every Main card that cites it), and `GET /api/index/<keyword>` (entry points
   resolved to Main cards). Shared pure error mapping (`toApiError`): 400 validation / 409 duplicate
   / 404 / 500.
+- OpenAPI 3.0 contract generated from the Zod schemas (not hand-maintained, so it cannot drift),
+  served live at `GET /api/openapi` and checked by a unit test.
 - Integration smoke test (`npm run smoke`): stands up an in-memory MongoDB and drives the API routes
   end-to-end (create across all three boxes, the 409/400/404 paths, and every traversal). Kept out of
   `npm run verify` so CI stays fast and dependency-free.

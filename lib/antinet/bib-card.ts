@@ -41,7 +41,7 @@ export const BibCardSchema = BibCardInputSchema.extend({
 export type BibCard = z.infer<typeof BibCardSchema>;
 
 /** Build a valid Bib-card document. Pure: the clock is injected as `now`. */
-export function newBibCard(input: BibCardInput, now: Date): BibCard {
+export function newBibCard(input: unknown, now: Date): BibCard {
   const parsed = BibCardInputSchema.parse(input);
   return BibCardSchema.parse({ ...parsed, createdAt: now });
 }

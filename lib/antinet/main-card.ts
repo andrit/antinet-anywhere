@@ -44,7 +44,7 @@ export type MainCard = z.infer<typeof MainCardSchema>;
  * Build a valid Main-card document from caller input. Pure: `now` is injected rather than read, so
  * the imperative shell owns the clock and this function needs no mocks.
  */
-export function newMainCard(input: MainCardInput, now: Date): MainCard {
+export function newMainCard(input: unknown, now: Date): MainCard {
   const parsed = MainCardInputSchema.parse(input);
   return MainCardSchema.parse({
     ...parsed,

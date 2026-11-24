@@ -38,7 +38,7 @@ export const IndexCardSchema = IndexCardInputSchema.extend({
 export type IndexCard = z.infer<typeof IndexCardSchema>;
 
 /** Build a valid Index-card document. Pure: the clock is injected as `now`. */
-export function newIndexCard(input: IndexCardInput, now: Date): IndexCard {
+export function newIndexCard(input: unknown, now: Date): IndexCard {
   const parsed = IndexCardInputSchema.parse(input);
   return IndexCardSchema.parse({ ...parsed, updatedAt: now });
 }

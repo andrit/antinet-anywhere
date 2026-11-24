@@ -9,6 +9,12 @@ the per-commit record; this file is the human-readable summary, grouped by relea
 
 ### Added
 
+- Slice-1 API routes wiring the closed circuit: create a card in each box
+  (`POST /api/main`, `/api/bib`, `/api/index`) and traverse it — `GET /api/main/<address>`
+  (card + backlinks + direct children + prev/next for box-flipping), `GET /api/bib/<slug>`
+  (the source plus every Main card that cites it), and `GET /api/index/<keyword>` (entry points
+  resolved to Main cards). Shared pure error mapping (`toApiError`): 400 validation / 409 duplicate
+  / 404 / 500.
 - Collection-access layer for the Main Box circuit over MongoDB: dependency-injected collection
   getters, startup index creation (`ensureAntinetIndexes`), and repositories covering the full
   circuit — insert/get, box-flipping (`nextCard`/`prevCard`), direct children (the Create-modal

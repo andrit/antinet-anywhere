@@ -2,21 +2,25 @@
 
 _Overwritten each session. Read first on resume. Not the only copy of anything._
 
-## Last step (2026-11-23)
-- Initial commit `22718fd` (git init, no remote).
-- **Collection access BUILT** — `lib/antinet/`: `queries.ts` (pure+tested), `collections.ts` (DI getters +
-  `ensureAntinetIndexes`), repos `main-card-repo.ts`/`bib-card-repo.ts`/`index-card-repo.ts` (I/O shells, v8-ignored).
-  Main repo covers the full circuit: insert/get, next/prevCard, childrenOf, backlinksTo, mainCardsCiting.
-  128 tests; `npm run verify` green; lib/antinet 100% lines/funcs, ~97.7% branch.
-- (Prior: Phase 0 docs ratified; address core + Zod card schemas built.)
+## Last step (2026-11-24)
+- **Slice-1 API routes BUILT** (`app/api/{main,bib,index}/…`): POST create each box; GET traverse the
+  circuit (main/<address> catch-all → card+backlinks+children+prev/next; bib/<slug> → who-cites;
+  index/<keyword> → resolved entry points). Pure `lib/antinet/api-errors.ts` (`toApiError`) tested.
+  Builders widened to accept `unknown` (validation boundary) so handlers pass the raw body.
+  150 tests; `npm run verify` green; lib/antinet 100% lines/funcs, ~97.3% branch.
+- (Prior: initial commit `22718fd`; collection access `71eb5c4`; CHANGELOG added.)
 
-## Next step — wire the thin closed circuit (slice 1): API + minimal UI
-- **API routes** (imperative shell: `import { db } from "@/lib/db"`, pass `db()` into repos):
-  create a card in each box; get a Main card + its citations/links/backlinks; Index keyword → entry-point Main cards;
-  Bib card → who-cites (mainCardsCiting). Validate request bodies with the Zod Input schemas; build via `newX(input, now)`.
-- Call `ensureAntinetIndexes(db())` at startup.
-- **Minimal UI** for the above (create + view across the three boxes; box-flip prev/next).
-- Generate/validate the OpenAPI contract for the routes (CLAUDE.md API-doc requirement).
+## Not yet verified / deferred
+- **Routes NOT exercised against a live Mongo** (no mongod in-container). Need a real DB round-trip:
+  run Mongo (`docker run -p 27017:27017 mongo`), set `.env` (DATABASE_URL, DB_NAME), `npm run dev`, curl.
+- **ensureAntinetIndexes not auto-wired at startup** (fragile hook + no DB at build; Mongo auto-indexes
+  `_id` so create/409 works; sortKey/text/authorSort are perf/feature-only). Wire via a migrate/seed
+  script or instrumentation in a later phase.
+
+## Next step
+- **OpenAPI contract** for the routes (CLAUDE.md: a feature isn't done until its API contract is documented).
+- **Minimal UI**: create + view across the three boxes; box-flip prev/next; Index→Main; Bib→who-cites.
+- Live smoke test of the circuit end-to-end against Mongo.
 
 ## Load first on resume
 1. `TODO.md` (this)

@@ -42,4 +42,9 @@ export async function markNotePromoted(
   await bibCards(db).updateOne({ _id: slug }, { $set: set } as UpdateFilter<BibCard>);
 }
 
+/** Delete a Bib card by slug; returns how many were deleted (0 if not found). */
+export async function deleteBibCard(db: Db, slug: string): Promise<number> {
+  return (await bibCards(db).deleteOne({ _id: slug })).deletedCount;
+}
+
 /* v8 ignore stop */

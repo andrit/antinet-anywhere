@@ -10,11 +10,11 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
 import { POST as createMain } from "@/app/api/main/route";
-import { GET as getMain } from "@/app/api/main/[...id]/route";
+import { GET as getMain, DELETE as deleteMainRoute } from "@/app/api/main/[...id]/route";
 import { POST as createBib } from "@/app/api/bib/route";
-import { GET as getBib } from "@/app/api/bib/[id]/route";
+import { GET as getBib, DELETE as deleteBibRoute } from "@/app/api/bib/[id]/route";
 import { POST as createIndex } from "@/app/api/index/route";
-import { GET as getIndex } from "@/app/api/index/[id]/route";
+import { GET as getIndex, DELETE as deleteIndexRoute } from "@/app/api/index/[id]/route";
 import { POST as addNote } from "@/app/api/bib/[id]/notes/route";
 import { POST as promoteNote } from "@/app/api/bib/[id]/promote/route";
 
@@ -68,6 +68,14 @@ const postTo = (
     }),
     { params: { id } },
   );
+
+const deleteById = (
+  handler: (r: Request, ctx: { params: { id: string } }) => Promise<Response>,
+  id: string,
+): Promise<Response> => handler(new Request("http://smoke/", { method: "DELETE" }), { params: { id } });
+
+const deleteMainByAddress = (segments: string[]): Promise<Response> =>
+  deleteMainRoute(new Request("http://smoke/", { method: "DELETE" }), { params: { id: segments } });
 
 describe("the antinet circuit (live MongoDB)", () => {
   it("turns end to end: create across all three boxes, then traverse", async () => {
@@ -146,5 +154,31 @@ describe("the antinet circuit (live MongoDB)", () => {
     // re-promoting the same note -> 409; a bad index -> 404
     expect((await postTo(promoteNote, "kahneman_2011", { noteIndex: 0, main: { _id: "3200/8", title: "x", body: "y" } })).status).toBe(409);
     expect((await postTo(promoteNote, "kahneman_2011", { noteIndex: 9, main: { _id: "3200/9", title: "x", body: "y" } })).status).toBe(404);
+
+    // --- Slice 3: deletion & referential integrity ---
+    // The Bib is cited (3200/4A, 3200/7), so deleting it is blocked and names the citers.
+    const blocked = await deleteById(deleteBibRoute, "kahneman_2011");
+    expect(blocked.status).toBe(409);
+    expect((await blocked.json()).citedBy).toEqual(expect.arrayContaining(["3200/4A", "3200/7"]));
+
+    // An Index card whose ONLY entry point is 3200/4B (to prove the sole-entry cascade delete).
+    expect((await post(createIndex, { _id: "solo", displayTerm: "Solo", entryPoints: ["3200/4B"] })).status).toBe(201);
+
+    // Delete 3200/4 -> heals 3200/4A's link to it, and pulls it from "cognitive bias" (kept, still has 3200/4A).
+    const del4 = await (async () => (await deleteMainByAddress(["3200", "4"])).json())();
+    expect(del4.unlinkedFrom).toBe(1);
+    expect(del4.entryPointRemovedFrom).toContain("cognitive bias");
+    expect((await (await getMainByAddress(["3200", "4A"])).json()).card.links).not.toContain("3200/4");
+
+    // Delete 3200/4B -> "solo" loses its only entry point and is deleted with it.
+    expect((await (await deleteMainByAddress(["3200", "4B"])).json()).indexCardsDeleted).toContain("solo");
+    expect((await getById(getIndex, "solo")).status).toBe(404);
+
+    // Remove the citing cards, then the Bib delete succeeds; missing targets are 404.
+    expect((await deleteMainByAddress(["3200", "4A"])).status).toBe(200);
+    expect((await deleteMainByAddress(["3200", "7"])).status).toBe(200);
+    expect((await deleteById(deleteBibRoute, "kahneman_2011")).status).toBe(200);
+    expect((await deleteById(deleteIndexRoute, "nope")).status).toBe(404);
+    expect((await deleteMainByAddress(["9999", "1"])).status).toBe(404);
   });
 });

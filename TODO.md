@@ -18,6 +18,12 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
 - **Slice-1 circuit now complete end-to-end**: schemas → repos → routes → OpenAPI → UI; API verified
   live via `npm run smoke`.
 
+- **Slice 3 — Deletion & referential integrity DONE** (plan `design/slice-3-referential-integrity.md`):
+  pure `lib/antinet/integrity.ts` `partitionIndexRefs` (+tests); repo delete/pull ops; `DELETE` on all
+  three routes (bib blocked-if-cited 409; main cascade heals links + pulls entry points + drops emptied
+  Index cards; index unconditional); OpenAPI (per-resource buildPaths refactor) + smoke extended; UI
+  Delete buttons. 168 tests; verify + smoke green; lib/antinet 100% lines/funcs. Create-time forward refs
+  still allowed by design.
 - **Slice 2 — Promote (Bib→Main) workflow DONE** (plan `design/slice-2-promote.md`): pure core
   `lib/antinet/promote.ts` (+tests) + `HttpError` in `api-errors.ts`; repo `addReadingNote`/`markNotePromoted`;
   routes `POST /api/bib/[id]/notes` + `/promote`; OpenAPI + smoke extended; UI `app/_components/bib-notes.tsx`.
@@ -33,8 +39,8 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
 ## Next step
 - **Human/browser QA** (roadmap phase 8): stand up Mongo + `npm run dev`, click slices 1–2 in a browser.
   All UI is build-verified only (no browser/Mongo in-container); the APIs are smoke-verified.
-- Then pick the next slice: address **suggester**, **A–Z browsing**, or **referential integrity**
-  (dangling refs still allowed). Also wire `ensureAntinetIndexes` at startup.
+- Then pick the next slice: address **suggester** or **A–Z browsing** (referential integrity is now
+  done for deletes). Also wire `ensureAntinetIndexes` at startup; consider Atlas + Vercel deploy docs.
 
 ## Load first on resume
 1. `TODO.md` (this)

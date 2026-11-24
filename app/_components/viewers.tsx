@@ -1,5 +1,15 @@
-import { CardLink } from "./atoms";
+import { CardLink, Button } from "./atoms";
 import type { MainView as MainViewData, BibView as BibViewData, IndexView as IndexViewData } from "@/lib/antinet/api-client";
+
+function DeleteButton(props: { id: string; onDelete: (id: string) => void }) {
+  return (
+    <div className="actions">
+      <Button variant="secondary" onClick={() => window.confirm(`Delete ${props.id}?`) && props.onDelete(props.id)}>
+        Delete
+      </Button>
+    </div>
+  );
+}
 
 function Group(props: { label: string; addrs: string[]; onOpen: (a: string) => void }) {
   if (props.addrs.length === 0) return null;
@@ -19,6 +29,7 @@ export function MainView(props: {
   view: MainViewData;
   onOpen: (a: string) => void;
   onOpenBib: (slug: string) => void;
+  onDelete: (a: string) => void;
 }) {
   const { card, backlinks, children, prev, next } = props.view;
   return (
@@ -46,11 +57,12 @@ export function MainView(props: {
           </div>
         </div>
       )}
+      <DeleteButton id={card._id} onDelete={props.onDelete} />
     </div>
   );
 }
 
-export function BibView(props: { view: BibViewData; onOpen: (a: string) => void }) {
+export function BibView(props: { view: BibViewData; onOpen: (a: string) => void; onDelete: (s: string) => void }) {
   const { card, citedBy } = props.view;
   return (
     <div className="reader">
@@ -62,11 +74,12 @@ export function BibView(props: { view: BibViewData; onOpen: (a: string) => void 
       </p>
       <Group label="Cited by" addrs={citedBy.map((c) => c._id)} onOpen={props.onOpen} />
       {citedBy.length === 0 && <p className="muted">No Main cards cite this yet.</p>}
+      <DeleteButton id={card._id} onDelete={props.onDelete} />
     </div>
   );
 }
 
-export function IndexView(props: { view: IndexViewData; onOpen: (a: string) => void }) {
+export function IndexView(props: { view: IndexViewData; onOpen: (a: string) => void; onDelete: (k: string) => void }) {
   const { card, entries } = props.view;
   return (
     <div className="reader">
@@ -88,6 +101,7 @@ export function IndexView(props: { view: IndexViewData; onOpen: (a: string) => v
           )}
         </div>
       </div>
+      <DeleteButton id={card._id} onDelete={props.onDelete} />
     </div>
   );
 }

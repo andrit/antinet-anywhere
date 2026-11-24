@@ -68,3 +68,10 @@ export interface PromoteBody {
 }
 export const promoteNote = (slug: string, body: PromoteBody): Promise<ApiResult<{ main: MainCard; bib: BibCard }>> =>
   postJson(`/api/bib/${encodeURIComponent(slug)}/promote`, body);
+
+const del = <T,>(url: string): Promise<ApiResult<T>> => request<T>(url, { method: "DELETE" });
+export const deleteMain = (address: string): Promise<ApiResult<{ deleted: string }>> => del(`/api/main/${address}`);
+export const deleteBib = (slug: string): Promise<ApiResult<{ deleted: string }>> =>
+  del(`/api/bib/${encodeURIComponent(slug)}`);
+export const deleteIndex = (keyword: string): Promise<ApiResult<{ deleted: string }>> =>
+  del(`/api/index/${encodeURIComponent(keyword)}`);

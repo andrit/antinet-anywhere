@@ -26,6 +26,13 @@ const MainCardViewSchema = z.object({
 });
 const BibCardViewSchema = z.object({ card: BibCardSchema, citedBy: z.array(MainCardSchema) });
 const PromoteResultSchema = z.object({ main: MainCardSchema, bib: BibCardSchema });
+const DeleteResultSchema = z.object({ deleted: z.string() });
+const MainDeleteResultSchema = z.object({
+  deleted: z.string(),
+  unlinkedFrom: z.number(),
+  entryPointRemovedFrom: z.array(z.string()),
+  indexCardsDeleted: z.array(z.string()),
+});
 const IndexCardViewSchema = z.object({
   card: IndexCardSchema,
   entries: z.array(z.object({ address: z.string(), card: MainCardSchema.nullable() })),
@@ -71,7 +78,31 @@ function getOp(o: GetOpSpec) {
   };
 }
 
-function buildPaths() {
+interface DeleteOpSpec {
+  summary: string;
+  param: string;
+  example: string;
+  outputName: string;
+  blockable?: boolean;
+}
+
+function deleteOp(o: DeleteOpSpec) {
+  const responses: Record<string, unknown> = {
+    "200": { description: "Deleted", content: jsonBody(o.outputName) },
+    "404": errorResponse("Not found"),
+    "500": errorResponse("Server error"),
+  };
+  if (o.blockable) {
+    responses["409"] = errorResponse("Blocked: still referenced by other cards");
+  }
+  return {
+    summary: o.summary,
+    parameters: [{ name: o.param, in: "path", required: true, schema: { type: "string" }, example: o.example }],
+    responses,
+  };
+}
+
+function buildMainPaths() {
   return {
     "/api/main": { post: createOp("Main", "MainCardInput", "MainCard", "address") },
     "/api/main/{address}": {
@@ -85,7 +116,18 @@ function buildPaths() {
         }),
         description: "The address contains '/' (e.g. 3200/4B1) and is taken as the full remaining path.",
       },
+      delete: deleteOp({
+        summary: "Delete a Main card (cascades: heals links, cleans entry points, drops emptied Index cards)",
+        param: "address",
+        example: "3200/4B1",
+        outputName: "MainDeleteResult",
+      }),
     },
+  };
+}
+
+function buildBibPaths() {
+  return {
     "/api/bib": { post: createOp("Bib", "BibCardInput", "BibCard", "slug") },
     "/api/bib/{slug}": {
       get: getOp({
@@ -95,7 +137,19 @@ function buildPaths() {
         viewName: "BibCardView",
         notFound: "Not found",
       }),
+      delete: deleteOp({
+        summary: "Delete a Bib card (blocked if any Main card still cites it)",
+        param: "slug",
+        example: "kahneman_2011",
+        outputName: "DeleteResult",
+        blockable: true,
+      }),
     },
+  };
+}
+
+function buildIndexPaths() {
+  return {
     "/api/index": { post: createOp("Index", "IndexCardInput", "IndexCard", "keyword") },
     "/api/index/{keyword}": {
       get: getOp({
@@ -104,6 +158,12 @@ function buildPaths() {
         example: "cognitive bias",
         viewName: "IndexCardView",
         notFound: "Not found",
+      }),
+      delete: deleteOp({
+        summary: "Delete an Index card",
+        param: "keyword",
+        example: "cognitive bias",
+        outputName: "DeleteResult",
       }),
     },
   };
@@ -159,6 +219,8 @@ function buildComponents() {
       AddReadingNote: toJson(AddReadingNoteSchema),
       Promote: toJson(PromoteSchema),
       PromoteResult: toJson(PromoteResultSchema),
+      DeleteResult: toJson(DeleteResultSchema),
+      MainDeleteResult: toJson(MainDeleteResultSchema),
       Error: toJson(ErrorSchema),
     },
   };
@@ -175,7 +237,7 @@ export function buildOpenApiDocument() {
         "Slice-1 antinet circuit: create cards in the three boxes (Main, Bib, Index) and traverse " +
         "the links between them.",
     },
-    paths: { ...buildPaths(), ...buildPromotePaths() },
+    paths: { ...buildMainPaths(), ...buildBibPaths(), ...buildIndexPaths(), ...buildPromotePaths() },
     components: buildComponents(),
   };
 }

@@ -4,7 +4,7 @@
  * selection) live in the pure, unit-tested helpers in queries.ts and address.ts; this file is only
  * the glue that runs them, so it is excluded from coverage like lib/db.ts.
  */
-import type { Db, Filter } from "mongodb";
+import type { Db, Filter, UpdateFilter } from "mongodb";
 import { mainCards } from "./collections";
 import { generateSortKey } from "./address";
 import { subtreeRange, selectDirectChildren } from "./queries";
@@ -54,6 +54,17 @@ export async function backlinksTo(db: Db, address: string): Promise<MainCard[]> 
 export async function mainCardsCiting(db: Db, bibId: string): Promise<MainCard[]> {
   const filter = { "citations.bibId": bibId } as Filter<MainCard>;
   return mainCards(db).find(filter).sort({ sortKey: 1 }).toArray();
+}
+
+/** Delete a Main card by address; returns how many were deleted (0 if not found). */
+export async function deleteMainCard(db: Db, address: string): Promise<number> {
+  return (await mainCards(db).deleteOne({ _id: address })).deletedCount;
+}
+
+/** Remove an address from every Main card's `links` (heals backlinks); returns cards modified. */
+export async function pullLinkFromAll(db: Db, address: string): Promise<number> {
+  const update = { $pull: { links: address } } as UpdateFilter<MainCard>;
+  return (await mainCards(db).updateMany({ links: address }, update)).modifiedCount;
 }
 
 /* v8 ignore stop */

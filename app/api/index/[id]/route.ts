@@ -7,9 +7,9 @@
  */
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getIndexCard } from "@/lib/antinet/index-card-repo";
+import { getIndexCard, deleteIndexCard } from "@/lib/antinet/index-card-repo";
 import { getMainCard } from "@/lib/antinet/main-card-repo";
-import { toApiError } from "@/lib/antinet/api-errors";
+import { toApiError, HttpError } from "@/lib/antinet/api-errors";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,19 @@ export async function GET(_request: Request, { params }: { params: { id: string 
       card.entryPoints.map(async (address) => ({ address, card: await getMainCard(handle, address) })),
     );
     return NextResponse.json({ card, entries });
+  } catch (err) {
+    const { status, body } = toApiError(err);
+    return NextResponse.json(body, { status });
+  }
+}
+
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+  try {
+    const keyword = params.id.trim().toLowerCase();
+    if ((await deleteIndexCard(db(), keyword)) === 0) {
+      throw new HttpError(404, "Index card not found");
+    }
+    return NextResponse.json({ deleted: keyword });
   } catch (err) {
     const { status, body } = toApiError(err);
     return NextResponse.json(body, { status });

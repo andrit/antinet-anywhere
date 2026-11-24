@@ -9,6 +9,11 @@ the per-commit record; this file is the human-readable summary, grouped by relea
 
 ### Added
 
+- Deletion with referential integrity: `DELETE` for all three boxes, with Delete buttons on each card
+  view. Deleting a Bib card is **blocked (409, listing the citers)** while any Main card cites it;
+  deleting a Main card **heals backlinks**, pulls it from Index entry points, and **drops any Index
+  card left empty**; deleting an Index card is unconditional. (Create-time *forward* references are
+  still allowed by design.)
 - Promote (Bib → Main) workflow — the core reading loop: add reading notes to a Bib card
   (`POST /api/bib/<slug>/notes`) and promote one into a new Main card that cites the source
   (`POST /api/bib/<slug>/promote`), marking the note done. Surfaced in the Bib panel (notes list +

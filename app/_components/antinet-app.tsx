@@ -8,6 +8,9 @@ import {
   getMain,
   getBib,
   getIndex,
+  deleteMain,
+  deleteBib,
+  deleteIndex,
   type ApiResult,
   type MainView as MV,
   type BibView as BV,
@@ -29,6 +32,15 @@ function useCircuitNav() {
       else setErr(r.error ?? "Not found");
     };
 
+  const remove =
+    <T,>(fn: (k: string) => Promise<ApiResult<T>>, clear: () => void) =>
+    async (key: string) => {
+      setErr(null);
+      const r = await fn(key);
+      if (r.ok) clear();
+      else setErr(r.error ?? "Delete failed");
+    };
+
   return {
     err,
     setErr,
@@ -38,6 +50,9 @@ function useCircuitNav() {
     openMain: open(getMain, setMain),
     openBib: open(getBib, setBib),
     openIndex: open(getIndex, setIndex),
+    removeMain: remove(deleteMain, () => setMain(null)),
+    removeBib: remove(deleteBib, () => setBib(null)),
+    removeIndex: remove(deleteIndex, () => setIndex(null)),
   };
 }
 
@@ -65,7 +80,9 @@ export function AntinetApp() {
           <h2>Main Box</h2>
           <MainForm onCreated={nav.openMain} onError={nav.setErr} />
           <OpenRow label="Open address" placeholder="3200/4B1" onOpen={nav.openMain} />
-          {nav.main && <MainView view={nav.main} onOpen={nav.openMain} onOpenBib={nav.openBib} />}
+          {nav.main && (
+            <MainView view={nav.main} onOpen={nav.openMain} onOpenBib={nav.openBib} onDelete={nav.removeMain} />
+          )}
         </section>
         <section className="panel">
           <h2>Bib Box</h2>
@@ -73,7 +90,7 @@ export function AntinetApp() {
           <OpenRow label="Open slug" placeholder="kahneman_2011" onOpen={nav.openBib} />
           {nav.bib && (
             <>
-              <BibView view={nav.bib} onOpen={nav.openMain} />
+              <BibView view={nav.bib} onOpen={nav.openMain} onDelete={nav.removeBib} />
               <BibNotes bib={nav.bib.card} onOpen={nav.openMain} onError={nav.setErr} onRefresh={nav.openBib} />
             </>
           )}
@@ -82,7 +99,7 @@ export function AntinetApp() {
           <h2>Index Box</h2>
           <IndexForm onCreated={nav.openIndex} onError={nav.setErr} />
           <OpenRow label="Open keyword" placeholder="cognitive bias" onOpen={nav.openIndex} />
-          {nav.index && <IndexView view={nav.index} onOpen={nav.openMain} />}
+          {nav.index && <IndexView view={nav.index} onOpen={nav.openMain} onDelete={nav.removeIndex} />}
         </section>
       </div>
     </div>

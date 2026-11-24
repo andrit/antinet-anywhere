@@ -37,6 +37,8 @@ describe("OpenAPI contract", () => {
       "AddReadingNote",
       "Promote",
       "PromoteResult",
+      "DeleteResult",
+      "MainDeleteResult",
       "Error",
     ]) {
       expect(names).toContain(name);

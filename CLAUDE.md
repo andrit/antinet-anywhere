@@ -63,6 +63,11 @@ documented: the API contract, the data model, and the UI components. See *Docume
 **SemVer and Conventional Commits.** `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`;
 `!` for a breaking change.
 
+**Changelog.** This project keeps a `CHANGELOG.md` ([Keep a Changelog](https://keepachangelog.com)
+form). Add a `## [Unreleased]` entry in the same change that makes a notable, user-facing or
+structural change; move Unreleased into a dated version section when a release is cut. Git history is
+the per-commit record; the changelog is the human-readable summary.
+
 **Deliberate shortcuts get a `ponytail:` comment.** When you knowingly take a simpler path with a
 known ceiling, mark it inline so it does not become invisible debt:
 

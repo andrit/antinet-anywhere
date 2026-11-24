@@ -39,5 +39,7 @@ support and feature requests** — the mechanism generalises well beyond this wo
 
 ## Open items
 
+- [001](001-fullstack-changelog-opt-in.md) — make the CHANGELOG opt-in explicit in the fullstack (base) template. **open**
+
 <!-- Add a line per proposal, newest last. -->
 _None yet._

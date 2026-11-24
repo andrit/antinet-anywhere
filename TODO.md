@@ -11,7 +11,12 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
 - (Prior: initial commit `22718fd`; collection access `71eb5c4`; CHANGELOG added.)
 
 - **OpenAPI contract DONE** — `lib/antinet/openapi.ts` generates it from the Zod schemas (via
-  `zod-to-json-schema`); served at `GET /api/openapi`; `openapi.test.ts` guards it. 155 tests, verify green.
+  `zod-to-json-schema`); served at `GET /api/openapi`; `openapi.test.ts` guards it.
+- **Slice-1 UI DONE (build-verified)** — light Design pass `design/ui-slice-1.md`; page `/` =
+  `app/_components/` (atoms, forms, viewers, `antinet-app`) + `lib/antinet/api-client.ts` + semantic
+  tokens in `app/globals.css`. `/` prerenders. 155 tests, verify green.
+- **Slice-1 circuit now complete end-to-end**: schemas → repos → routes → OpenAPI → UI; API verified
+  live via `npm run smoke`.
 
 ## Verified / deferred
 - **Circuit VERIFIED LIVE** via `npm run smoke` (`lib/antinet/circuit.smoke.ts` + `vitest.smoke.config.ts`):
@@ -21,8 +26,10 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
   works; sortKey/text/authorSort are perf/feature-only). Wire via a migrate/seed script later.
 
 ## Next step
-- **Minimal UI** (slice-1 "done" remaining): create + view across the three boxes; box-flip prev/next;
-  Index→Main; Bib→who-cites. (Design phase D artifacts may come first — see roadmap.)
+- **Human/browser QA of slice 1** (roadmap phase 8 QA gate): stand up Mongo + `npm run dev`, click the
+  circuit in a browser. The UI is build-verified only (no browser/Mongo in-container).
+- Then pick the next slice: Bib→Main **promote** workflow, A–Z browsing, the address **suggester**, or
+  **referential integrity** (dangling refs currently allowed). Also wire `ensureAntinetIndexes` at startup.
 
 ## Load first on resume
 1. `TODO.md` (this)

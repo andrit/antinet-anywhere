@@ -9,6 +9,10 @@ the per-commit record; this file is the human-readable summary, grouped by relea
 
 ### Added
 
+- Slice-1 web UI at `/`: a single page with Main / Bib / Index panels — create a card in each box and
+  traverse the whole circuit by clicking addresses (children, links, backlinks, citations, box-flip;
+  Index → Main; Bib → who-cites). Semantic design tokens (light + dark via `prefers-color-scheme`);
+  the client talks to the API through a typed `api-client`. Light Design pass in `design/ui-slice-1.md`.
 - Slice-1 API routes wiring the closed circuit: create a card in each box
   (`POST /api/main`, `/api/bib`, `/api/index`) and traverse it — `GET /api/main/<address>`
   (card + backlinks + direct children + prev/next for box-flipping), `GET /api/bib/<slug>`

@@ -263,7 +263,36 @@ npm run smoke    # integration test: spins up an in-memory MongoDB and drives th
 
 ---
 
-## 10. Troubleshooting
+## 10. Deployment & hosting
+
+Running MongoDB locally is optional — the easiest path (and the lightest on your machine) is a hosted
+database, which also works for local development.
+
+### Database: MongoDB Atlas (free)
+
+1. Create a free **M0** cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas).
+2. Add a **database user** and, under **Network Access**, allow your IP (or `0.0.0.0/0` for a quick
+   start / so a serverless host can reach it).
+3. Copy the `mongodb+srv://…` connection string into `DATABASE_URL`, and set `DB_NAME` (e.g. `app`).
+   Use the same string in your local `.env` and you never need a local `mongod`.
+4. The performance indexes aren't created automatically — run the snippet in §4 once against the
+   cluster (`mongosh "<your srv string>/app"`).
+
+### App: Vercel (recommended) or Railway
+
+- **Vercel** — the native home for Next.js. Import the repo, set **Environment Variables**
+  (`DATABASE_URL`, `DB_NAME`, `APP_URL`), deploy. Pair it with Atlas for the database. The app is
+  already serverless-friendly: the Mongo client is created lazily and cached on `globalThis`, routes
+  are `force-dynamic`, and `DATABASE_URL` accepts `mongodb+srv://`.
+- **Railway** — an all-in-one option (not Postgres-only): deploy the Next app **and** a MongoDB
+  service from Railway's templates, then set the same environment variables.
+
+Never commit secrets — set `DATABASE_URL` in the host's dashboard, not in the repo (`.env` is
+git-ignored). `.env.example` documents which variables are needed.
+
+---
+
+## 11. Troubleshooting
 
 | Symptom | Likely cause / fix |
 |---|---|

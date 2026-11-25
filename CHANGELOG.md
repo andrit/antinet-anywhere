@@ -9,6 +9,9 @@ the per-commit record; this file is the human-readable summary, grouped by relea
 
 ### Added
 
+- Address suggester: `GET /api/suggest?anchor=<address>` returns the next **free** child and sibling
+  addresses (skipping ones that already exist; `sibling` is null for a section header). In the
+  Create-Main form, "+ Child / + Sibling of <open card>" buttons fill the address field.
 - A–Z browsing: pick a letter to list Bib cards by author (`GET /api/bib?letter=`) or Index cards by
   keyword (`GET /api/index?letter=`); an A–Z bar in both panels, with results that click through to the
   card. Prefix matching is regex-injection-safe.

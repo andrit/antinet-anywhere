@@ -81,7 +81,7 @@ export function AntinetApp() {
       <div className="panels">
         <section className="panel">
           <h2>Main Box</h2>
-          <MainForm onCreated={nav.openMain} onError={nav.setErr} />
+          <MainForm onCreated={nav.openMain} onError={nav.setErr} anchor={nav.main?.card._id} />
           <OpenRow label="Open address" placeholder="3200/4B1" onOpen={nav.openMain} />
           {nav.main && (
             <MainView view={nav.main} onOpen={nav.openMain} onOpenBib={nav.openBib} onDelete={nav.removeMain} />

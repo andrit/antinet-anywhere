@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Field, TextField, Button } from "./atoms";
-import { createCard } from "@/lib/antinet/api-client";
+import { createCard, suggestAddress } from "@/lib/antinet/api-client";
 
 interface FormProps {
   onCreated: (id: string) => void;
@@ -12,7 +12,26 @@ function idOf(data: unknown): string {
   return (data as { _id: string })._id;
 }
 
-export function MainForm({ onCreated, onError }: FormProps) {
+function AddressSuggest(props: { anchor: string; onPick: (a: string) => void; onError: (m: string) => void }) {
+  const pick = async (kind: "child" | "sibling") => {
+    const r = await suggestAddress(props.anchor);
+    if (!r.ok || !r.data) {
+      props.onError(r.error ?? "Suggest failed");
+      return;
+    }
+    const next = kind === "child" ? r.data.child : r.data.sibling;
+    if (next) props.onPick(next);
+    else props.onError("A section has no computed sibling — choose the next section yourself");
+  };
+  return (
+    <div className="chips">
+      <Button variant="secondary" onClick={() => void pick("child")}>+ Child of {props.anchor}</Button>
+      <Button variant="secondary" onClick={() => void pick("sibling")}>+ Sibling of {props.anchor}</Button>
+    </div>
+  );
+}
+
+export function MainForm({ onCreated, onError, anchor }: FormProps & { anchor?: string }) {
   const [id, setId] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -39,6 +58,7 @@ export function MainForm({ onCreated, onError }: FormProps) {
 
   return (
     <form onSubmit={(e) => (e.preventDefault(), void submit())}>
+      {anchor && <AddressSuggest anchor={anchor} onPick={setId} onError={onError} />}
       <Field label="Address (e.g. 3200/4B1)" value={id} onChange={setId} />
       <Field label="Title" value={title} onChange={setTitle} />
       <TextField label="Body (≤600 chars)" value={body} onChange={setBody} />

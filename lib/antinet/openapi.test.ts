@@ -19,6 +19,7 @@ describe("OpenAPI contract", () => {
       "/api/index/{keyword}",
       "/api/main",
       "/api/main/{address}",
+      "/api/suggest",
     ]);
   });
 
@@ -39,6 +40,7 @@ describe("OpenAPI contract", () => {
       "PromoteResult",
       "DeleteResult",
       "MainDeleteResult",
+      "SuggestResult",
       "Error",
     ]) {
       expect(names).toContain(name);

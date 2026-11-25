@@ -17,6 +17,7 @@ import { POST as createIndex, GET as listIndex } from "@/app/api/index/route";
 import { GET as getIndex, DELETE as deleteIndexRoute } from "@/app/api/index/[id]/route";
 import { POST as addNote } from "@/app/api/bib/[id]/notes/route";
 import { POST as promoteNote } from "@/app/api/bib/[id]/promote/route";
+import { GET as suggestRoute } from "@/app/api/suggest/route";
 
 let mongod: MongoMemoryServer;
 
@@ -139,6 +140,11 @@ describe("the antinet circuit (live MongoDB)", () => {
     // --- Slice 4: A–Z browse ---
     expect((await (await getList(listBib, "letter=K")).json()).map((c: { _id: string }) => c._id)).toContain("kahneman_2011");
     expect((await (await getList(listIndex, "letter=C")).json()).map((c: { _id: string }) => c._id)).toContain("cognitive bias");
+
+    // --- Slice 5: address suggester (3200/4, 3200/4A, 3200/4B exist) ---
+    expect(await (await getList(suggestRoute, "anchor=3200/4")).json()).toMatchObject({ child: "3200/4C", sibling: "3200/5" });
+    expect(await (await getList(suggestRoute, "anchor=3200/4A")).json()).toMatchObject({ child: "3200/4A1", sibling: "3200/4C" });
+    expect((await (await getList(suggestRoute, "anchor=3200")).json()).sibling).toBeNull(); // section has no sibling
 
     // --- Slice 2: add a reading note, then promote it into a Main card ---
     const noteRes = await postTo(addNote, "kahneman_2011", { page: "99", note: "Anchoring heuristic" });

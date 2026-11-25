@@ -80,6 +80,11 @@ export async function browseBib(letter: string): Promise<ApiResult<BrowseItem[]>
   return { ok: true, status: r.status, data: r.data.map((c) => ({ _id: c._id, label: `${c.authorSort} — ${c.title}` })) };
 }
 
+export const suggestAddress = (
+  anchor: string,
+): Promise<ApiResult<{ anchor: string; child: string; sibling: string | null }>> =>
+  request(`/api/suggest?anchor=${encodeURIComponent(anchor)}`);
+
 export async function browseIndex(letter: string): Promise<ApiResult<BrowseItem[]>> {
   const r = await request<IndexCard[]>(`/api/index?letter=${encodeURIComponent(letter)}`);
   if (!r.ok || !r.data) return { ok: r.ok, status: r.status, data: null, error: r.error };

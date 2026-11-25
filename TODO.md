@@ -18,6 +18,10 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
 - **Slice-1 circuit now complete end-to-end**: schemas → repos → routes → OpenAPI → UI; API verified
   live via `npm run smoke`.
 
+- **Slice 5 — Address suggester DONE** (plan `design/slice-5-suggester.md`): pure `lib/antinet/suggest.ts`
+  `firstFree` (+tests); repo `suggestChildAddress`/`suggestSiblingAddress` (childrenOf set + firstFree);
+  `GET /api/suggest?anchor=`; OpenAPI + smoke extended; UI "+ Child/+ Sibling" buttons in Create-Main.
+  178 tests; verify + smoke green; lib/antinet 100% lines/funcs. **All four deferred slices now done.**
 - **Slice 4 — A–Z browsing DONE** (plan `design/slice-4-az-browsing.md`): pure `lib/antinet/browse.ts`
   (`escapeRegExp`/`prefixMatcher`, +tests); repo `bibCardsByLetter`/`indexCardsByLetter`; `GET /api/bib`
   and `GET /api/index` (optional `?letter=`); OpenAPI browse ops; smoke extended; UI `AzBrowser` in both
@@ -40,11 +44,13 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
 - **ensureAntinetIndexes not auto-wired at startup** (deferred; Mongo auto-indexes `_id` so create/409
   works; sortKey/text/authorSort are perf/feature-only). Wire via a migrate/seed script later.
 
-## Next step
-- **Human/browser QA** (roadmap phase 8): stand up Mongo + `npm run dev`, click slices 1–2 in a browser.
+## Next step (core feature slices all done)
+- **Wire `ensureAntinetIndexes` at startup** (currently manual; Mongo auto-indexes `_id`). Options:
+  a seed/migrate script, or Next instrumentation (guard against build-time + no-DB).
+- **Human/browser QA** (roadmap phase 8): Atlas + `npm run dev`, click the whole app in a browser.
   All UI is build-verified only (no browser/Mongo in-container); the APIs are smoke-verified.
-- Then pick the next slice: address **suggester** (the last of the four deferred items; sibling/child/
-  parent already exist in the core — mostly surfacing them). Also wire `ensureAntinetIndexes` at startup.
+- Then roadmap polish: real test phase (E2E/component for the UI — we have unit + a live API smoke, but
+  no browser tests), a11y, mobile audit, perf; then Milestone A (infra/deploy — see user-guide §10).
 
 ## Load first on resume
 1. `TODO.md` (this)

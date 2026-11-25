@@ -6,8 +6,9 @@
  */
 import type { Db, Filter, UpdateFilter } from "mongodb";
 import { mainCards } from "./collections";
-import { generateSortKey } from "./address";
+import { generateSortKey, child, sibling, parent } from "./address";
 import { subtreeRange, selectDirectChildren } from "./queries";
+import { firstFree } from "./suggest";
 import type { MainCard } from "./main-card";
 
 /* v8 ignore start -- database I/O only; logic is tested in queries.test.ts / address.test.ts. */
@@ -65,6 +66,22 @@ export async function deleteMainCard(db: Db, address: string): Promise<number> {
 export async function pullLinkFromAll(db: Db, address: string): Promise<number> {
   const update = { $pull: { links: address } } as UpdateFilter<MainCard>;
   return (await mainCards(db).updateMany({ links: address }, update)).modifiedCount;
+}
+
+/** The next free child address under `anchor` (its first child, stepped past any that exist). */
+export async function suggestChildAddress(db: Db, anchor: string): Promise<string> {
+  const taken = new Set((await childrenOf(db, anchor)).map((c) => c._id));
+  return firstFree(child(anchor), sibling, (a) => taken.has(a));
+}
+
+/** The next free sibling address after `anchor`; null for a section header (sections are free-choice). */
+export async function suggestSiblingAddress(db: Db, anchor: string): Promise<string | null> {
+  const p = parent(anchor);
+  if (p === null) {
+    return null;
+  }
+  const taken = new Set((await childrenOf(db, p)).map((c) => c._id));
+  return firstFree(sibling(anchor), sibling, (a) => taken.has(a));
 }
 
 /* v8 ignore stop */

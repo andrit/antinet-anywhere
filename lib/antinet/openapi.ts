@@ -33,6 +33,11 @@ const MainDeleteResultSchema = z.object({
   entryPointRemovedFrom: z.array(z.string()),
   indexCardsDeleted: z.array(z.string()),
 });
+const SuggestResultSchema = z.object({
+  anchor: z.string(),
+  child: z.string(),
+  sibling: z.string().nullable(),
+});
 const IndexCardViewSchema = z.object({
   card: IndexCardSchema,
   entries: z.array(z.object({ address: z.string(), card: MainCardSchema.nullable() })),
@@ -216,6 +221,22 @@ function buildPromotePaths() {
   };
 }
 
+function buildSuggestPath() {
+  return {
+    "/api/suggest": {
+      get: {
+        summary: "Suggest the next free child and sibling addresses for an anchor",
+        parameters: [{ name: "anchor", in: "query", required: true, schema: { type: "string" }, example: "3200/4B" }],
+        responses: {
+          "200": { description: "Suggested next addresses (sibling is null for a section)", content: jsonBody("SuggestResult") },
+          "400": errorResponse("Invalid anchor"),
+          "500": errorResponse("Server error"),
+        },
+      },
+    },
+  };
+}
+
 function buildComponents() {
   return {
     schemas: {
@@ -233,6 +254,7 @@ function buildComponents() {
       PromoteResult: toJson(PromoteResultSchema),
       DeleteResult: toJson(DeleteResultSchema),
       MainDeleteResult: toJson(MainDeleteResultSchema),
+      SuggestResult: toJson(SuggestResultSchema),
       Error: toJson(ErrorSchema),
     },
   };
@@ -249,7 +271,13 @@ export function buildOpenApiDocument() {
         "Slice-1 antinet circuit: create cards in the three boxes (Main, Bib, Index) and traverse " +
         "the links between them.",
     },
-    paths: { ...buildMainPaths(), ...buildBibPaths(), ...buildIndexPaths(), ...buildPromotePaths() },
+    paths: {
+      ...buildMainPaths(),
+      ...buildBibPaths(),
+      ...buildIndexPaths(),
+      ...buildPromotePaths(),
+      ...buildSuggestPath(),
+    },
     components: buildComponents(),
   };
 }

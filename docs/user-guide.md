@@ -74,10 +74,12 @@ curl -s http://localhost:3000/api/health
 - `status: "ok"` + HTTP 200 → app and database both up.
 - `status: "degraded"` + HTTP 503 → app is up but can't reach MongoDB (check step 2).
 
-### (Optional) Create the performance indexes
+### Indexes (created automatically)
 
-The app works without these — MongoDB always indexes `_id` (so duplicate addresses are rejected).
-These speed up box-flipping and enable the (future) full-text search. In `mongosh` (see §8):
+The app ensures its indexes on startup (`instrumentation.ts`), so there's no manual step. They're
+performance-only — MongoDB always indexes `_id`, so duplicate addresses are rejected regardless — and
+creation is non-fatal: if the database is briefly unreachable at boot it just logs a warning and tries
+again next start. If you ever want to create them by hand (e.g. against a fresh cluster), in `mongosh`:
 
 ```js
 use app
@@ -281,8 +283,7 @@ database, which also works for local development.
    separate "my IP" entry (it would just go stale).
 4. Copy the `mongodb+srv://…` connection string into `DATABASE_URL`, and set `DB_NAME` (e.g. `app`).
    Use the same string in your local `.env` and you never need a local `mongod`.
-5. The performance indexes aren't created automatically — run the snippet in §4 once against the
-   cluster (`mongosh "<your srv string>/app"`).
+5. Indexes are created automatically on first startup (`instrumentation.ts`) — no manual step; see §4.
 
 ### App: Vercel (recommended) or Railway
 
@@ -307,4 +308,4 @@ git-ignored). `.env.example` documents which variables are needed.
 | `409` when creating a card | That address / slug / keyword already exists — pick another or open the existing one. |
 | `400` with `details` | The body failed validation (bad address, body > 600 chars, > 4 entry points, …). |
 | `404` opening a Main card | Address not found, or not a valid antinet address. |
-| Box order looks wrong | Create the `sortKey` index (§4) and prefer the API's ordering. |
+| Box order looks wrong | Indexes are auto-created at startup (§4); if the DB was unreachable at boot, restart the app. Prefer the API's ordering. |

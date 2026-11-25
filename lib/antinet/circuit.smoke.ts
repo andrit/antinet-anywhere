@@ -18,6 +18,8 @@ import { GET as getIndex, DELETE as deleteIndexRoute } from "@/app/api/index/[id
 import { POST as addNote } from "@/app/api/bib/[id]/notes/route";
 import { POST as promoteNote } from "@/app/api/bib/[id]/promote/route";
 import { GET as suggestRoute } from "@/app/api/suggest/route";
+import { db } from "@/lib/db";
+import { ensureAntinetIndexes, mainCards } from "@/lib/antinet/collections";
 
 let mongod: MongoMemoryServer;
 
@@ -83,6 +85,11 @@ const getList = (handler: (r: Request) => Promise<Response>, query: string): Pro
 
 describe("the antinet circuit (live MongoDB)", () => {
   it("turns end to end: create across all three boxes, then traverse", async () => {
+    // --- Startup indexes (what instrumentation.node.ts runs on boot) create the real indexes ---
+    await ensureAntinetIndexes(db());
+    const mainIndexes = await mainCards(db()).listIndexes().toArray();
+    expect(mainIndexes.some((i) => i.key?.sortKey === 1)).toBe(true);
+
     // --- Create a source in the Bib Box ---
     expect((await post(createBib, {
       _id: "kahneman_2011",

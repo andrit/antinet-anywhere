@@ -45,8 +45,8 @@ _Overwritten each session. Read first on resume. Not the only copy of anything._
   works; sortKey/text/authorSort are perf/feature-only). Wire via a migrate/seed script later.
 
 ## Next step (core feature slices all done)
-- **Wire `ensureAntinetIndexes` at startup** (currently manual; Mongo auto-indexes `_id`). Options:
-  a seed/migrate script, or Next instrumentation (guard against build-time + no-DB).
+- **`ensureAntinetIndexes` now auto-runs at startup** via `instrumentation.ts` → `instrumentation.node.ts`
+  (Node-runtime guard keeps mongodb out of the Edge bundle; non-fatal). Done 2026-11-25.
 - **Human/browser QA** (roadmap phase 8): Atlas + `npm run dev`, click the whole app in a browser.
   All UI is build-verified only (no browser/Mongo in-container); the APIs are smoke-verified.
 - Then roadmap polish: real test phase (E2E/component for the UI — we have unit + a live API smoke, but

@@ -9,6 +9,9 @@ the per-commit record; this file is the human-readable summary, grouped by relea
 
 ### Added
 
+- Indexes are now created automatically on server startup via Next.js instrumentation
+  (`ensureAntinetIndexes`), Node-runtime only and non-fatal if the database is briefly unreachable —
+  no manual index step.
 - Address suggester: `GET /api/suggest?anchor=<address>` returns the next **free** child and sibling
   addresses (skipping ones that already exist; `sibling` is null for a section header). In the
   Create-Main form, "+ Child / + Sibling of <open card>" buttons fill the address field.

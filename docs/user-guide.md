@@ -270,12 +270,18 @@ database, which also works for local development.
 
 ### Database: MongoDB Atlas (free)
 
-1. Create a free **M0** cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas).
-2. Add a **database user** and, under **Network Access**, allow your IP (or `0.0.0.0/0` for a quick
-   start / so a serverless host can reach it).
-3. Copy the `mongodb+srv://…` connection string into `DATABASE_URL`, and set `DB_NAME` (e.g. `app`).
+1. Create a free **M0** cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas). Skip "Load
+   sample dataset" — the app creates its own database and collections on first write.
+2. Add a **database user** with a strong auto-generated password and `readWrite` on your database
+   (not `atlasAdmin`).
+3. **Network Access:** for a Vercel (or any serverless) deployment, allow **`0.0.0.0/0`** — Vercel's
+   functions have dynamic egress IPs with no fixed range to allowlist. That opens only the *network*
+   layer; every connection still needs the username/password over TLS, so the credentials (kept out
+   of git) are the real gate. One `0.0.0.0/0` entry also covers local dev, so you don't need a
+   separate "my IP" entry (it would just go stale).
+4. Copy the `mongodb+srv://…` connection string into `DATABASE_URL`, and set `DB_NAME` (e.g. `app`).
    Use the same string in your local `.env` and you never need a local `mongod`.
-4. The performance indexes aren't created automatically — run the snippet in §4 once against the
+5. The performance indexes aren't created automatically — run the snippet in §4 once against the
    cluster (`mongosh "<your srv string>/app"`).
 
 ### App: Vercel (recommended) or Railway
